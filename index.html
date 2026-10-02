@@ -11,15 +11,22 @@
       --bg:#f4f7fb; --accent:#2563eb; --accent2:#0f766e; --soft:#eef4ff;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#eef4ff 0,#f8fafc 340px,#f4f7fb 100%);color:var(--ink)}
-    .wrap{width:min(940px,calc(100% - 28px));margin:42px auto 64px}
-    .hero{background:linear-gradient(135deg,#172554,#1e3a8a 55%,#0f766e);color:white;border-radius:24px;padding:34px 34px 30px;box-shadow:0 18px 45px rgba(23,32,51,.16)}
-    .brand{font-size:14px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:.9}
-    h1{font-size:clamp(32px,5vw,50px);line-height:1.02;margin:10px 0 12px}
-    .tagline{font-size:18px;margin:0 0 18px;opacity:.92}
-    .free{display:inline-block;background:white;color:#0f5132;font-weight:800;border-radius:999px;padding:9px 14px;margin-top:4px}
-    .intro{margin-top:20px;max-width:780px;line-height:1.65;color:#e8eefc}
-    .card{background:var(--panel);border:1px solid rgba(217,224,234,.8);border-radius:22px;margin-top:22px;padding:30px;box-shadow:0 12px 32px rgba(23,32,51,.08)}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f9fc;color:var(--ink)}
+    .wrap{width:min(940px,calc(100% - 28px));margin:26px auto 64px}
+    .sitebar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;padding:4px 2px}
+    .wordmark{font-size:19px;font-weight:900;letter-spacing:.12em;color:#172554}
+    .beta-label{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#475467;background:#eef2f7;border:1px solid #d9e0ea;border-radius:999px;padding:7px 11px}
+    .hero{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:34px;box-shadow:0 8px 24px rgba(23,32,51,.06)}
+    .brand{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#1d4ed8}
+    h1{font-size:clamp(32px,5vw,48px);line-height:1.06;margin:10px 0 10px;color:#172554}
+    .tagline{font-size:18px;margin:0;color:#475467}
+    .intro{margin:20px 0 0;max-width:780px;line-height:1.65;color:#475467}
+    .trust{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px}
+    .trust-item{border:1px solid var(--line);background:#f8fafc;border-radius:12px;padding:12px 14px}
+    .trust-item b{display:block;font-size:13px;color:#172554;margin-bottom:3px}
+    .trust-item span{font-size:12px;line-height:1.4;color:#667085}
+    .server-note{margin-top:16px;padding:13px 15px;border-left:4px solid #2563eb;background:#f5f8ff;border-radius:8px;color:#475467;font-size:13px;line-height:1.5}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;margin-top:18px;padding:30px;box-shadow:0 8px 24px rgba(23,32,51,.05)}
     h2{margin:0 0 6px;font-size:22px}
     .section-note{color:var(--muted);margin:0 0 24px;line-height:1.5}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -36,21 +43,33 @@
     .wide-choices{grid-template-columns:repeat(3,minmax(0,1fr))}
     .ack{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:15px}
     .submit-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:26px}
-    button{appearance:none;border:0;border-radius:12px;padding:14px 22px;background:linear-gradient(135deg,var(--accent),#1d4ed8);color:white;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(37,99,235,.22)}
-    button:hover{filter:brightness(.98)}
+    button{appearance:none;border:0;border-radius:10px;padding:14px 22px;background:#1d4ed8;color:white;font:inherit;font-weight:800;cursor:pointer;box-shadow:none}
+    button:hover{background:#1e40af}
     .privacy{font-size:13px;color:var(--muted);line-height:1.4}
     .bot{position:absolute;left:-9999px}
-    @media(max-width:720px){.wrap{margin-top:18px}.hero,.card{padding:22px}.grid,.choices,.wide-choices{grid-template-columns:1fr}.submit-row{align-items:stretch;flex-direction:column}.submit-row button{width:100%}}
+    @media(max-width:720px){.wrap{margin-top:14px}.sitebar{padding:0 2px}.hero,.card{padding:22px}.trust,.grid,.choices,.wide-choices{grid-template-columns:1fr}.submit-row{align-items:stretch;flex-direction:column}.submit-row button{width:100%}}
   </style>
 </head>
 <body>
   <main class="wrap">
+    <div class="sitebar">
+      <div class="wordmark">VENTRYVO</div>
+      <div class="beta-label">Private Beta Program</div>
+    </div>
+
     <section class="hero">
-      <div class="brand">VENTRYVO</div>
-      <h1>Beta Tester Application</h1>
+      <div class="brand">Beta Tester Application</div>
+      <h1>Help shape VENTRYVO before launch.</h1>
       <p class="tagline">Markets. Vendors. Events. One Place.</p>
-      <span class="free">Beta testing is completely free</span>
-      <p class="intro">VENTRYVO is an upcoming event-management platform being developed for craft markets, vendor events, festivals, pop-ups, farmers markets, and other vendor-based events. I’m looking for a limited number of coordinators to use the system in real-world situations, report bugs, suggest improvements, and help shape what comes next. Because this is beta software, some features may change and occasional bugs should be expected.</p>
+      <p class="intro">VENTRYVO is an event-management platform being developed for craft markets, vendor events, festivals, pop-ups, farmers markets, and other vendor-based events. We’re inviting a limited group of coordinators to test the platform with real workflows and provide practical feedback before its broader release.</p>
+
+      <div class="trust">
+        <div class="trust-item"><b>Secure submission</b><span>Your application is stored in the VENTRYVO system for beta review.</span></div>
+        <div class="trust-item"><b>No charge to participate</b><span>Selected beta testers receive access at no cost during the beta program.</span></div>
+        <div class="trust-item"><b>Built for real events</b><span>We’re looking for coordinators willing to test with real-world event workflows.</span></div>
+      </div>
+
+      <div class="server-note"><strong>About this web address:</strong> VENTRYVO is currently running on a temporary secure server address while our permanent VENTRYVO domain is being finalized. You’re in the right place. The permanent domain is coming soon.</div>
     </section>
 
     <form class="card" name="ventryvo-beta-testers" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you">
@@ -59,8 +78,8 @@
       <input type="hidden" name="submission-id" id="submission-id" value="" />
       <p class="bot"><label>Don’t fill this out: <input name="bot-field" /></label></p>
 
-      <h2>About you</h2>
-      <p class="section-note">Tell me a little about you and the events you coordinate.</p>
+      <h2>Organization & contact information</h2>
+      <p class="section-note">Tell us about you and the events you coordinate. Required fields are marked with an asterisk.</p>
       <div class="grid">
         <div class="field"><label for="name">Your Name <span class="req">*</span></label><input id="name" name="name" type="text" required /></div>
         <div class="field"><label for="email">Email Address <span class="req">*</span></label><input id="email" name="email" type="email" required /></div>
@@ -101,8 +120,8 @@
         </div>
       </div>
 
-      <h2 style="margin-top:34px">What you want to test</h2>
-      <p class="section-note">This helps me choose a mix of beta testers with different workflows and priorities.</p>
+      <h2 style="margin-top:34px">Beta testing interests</h2>
+      <p class="section-note">Your answers help us select a balanced group of coordinators with different workflows, event sizes, and operational needs.</p>
       <div class="field">
         <span class="label">Which VENTRYVO features are you most interested in testing? <span class="req">*</span></span>
         <div class="choices wide-choices">
@@ -144,7 +163,7 @@
       </div>
 
       <div class="submit-row">
-        <div class="privacy">Submitting this application does not guarantee selection for the beta. Your information will be used to contact you about VENTRYVO beta testing.</div>
+        <div class="privacy">Submitting this application does not guarantee selection. Your information will be used only for VENTRYVO beta evaluation, onboarding, and related communication.</div>
         <button type="submit">Apply to Beta Test VENTRYVO</button>
       </div>
     </form>
