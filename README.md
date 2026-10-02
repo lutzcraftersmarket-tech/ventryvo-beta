@@ -2,11 +2,11 @@
 
 VENTRYVO is an event-management platform for craft markets, vendor events, festivals, pop-ups, farmers markets, and other vendor-based events.
 
-## Current beta site
+## Current site
 
-- Public beta tester application: `/`
-- Share / printable invitation: `/invite`
-- Thank-you page: `/thank-you`
+- Public beta tester application: `https://ventryvo.netlify.app/`
+- Share / printable invitation: `https://ventryvo.netlify.app/invite`
+- Thank-you page: `https://ventryvo.netlify.app/thank-you`
 
 ## Platform direction
 
@@ -14,8 +14,8 @@ This repository is the starting point for the VENTRYVO SaaS platform. The backen
 
 Core platform areas planned from this base:
 
-- Platform owner / super-admin controls
-- Organization workspaces
+- Platform owner / super-admin controls (`/admin`)
+- Organization workspaces (`/app`)
 - User memberships and staff roles
 - Events
 - Vendors
@@ -34,7 +34,7 @@ Payment card data must never be stored directly in the application database. A p
 
 Every customer-owned operational record is scoped to an `organization_id`. Supabase RLS policies restrict access to users who belong to that organization, while platform-admin data is separately restricted.
 
-The public beta form is handled by Netlify Forms. Beta application records in Supabase are not anonymously readable.
+The public beta form saves directly into a protected Supabase intake function. Netlify Forms remains a backup copy. Beta application records in Supabase are not anonymously readable.
 
 ## Beta
 
