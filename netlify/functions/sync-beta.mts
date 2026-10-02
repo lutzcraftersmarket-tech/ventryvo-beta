@@ -3,7 +3,7 @@ export default async (req: Request) => {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
-  const token = Netlify.env.get("VENTRYVO_BETA_SYNC_TOKEN");
+  const token = process.env.VENTRYVO_BETA_SYNC_TOKEN;
   if (!token) {
     console.error("VENTRYVO_BETA_SYNC_TOKEN is not configured.");
     return Response.json({ error: "Server configuration error" }, { status: 500 });
