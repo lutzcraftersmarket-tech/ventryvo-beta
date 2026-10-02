@@ -54,7 +54,9 @@
     </section>
 
     <form class="card" name="ventryvo-beta-testers" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you">
-      <input type="hidden" name="form-name" value="ventryvo-beta-testers" />\n      <input type="hidden" name="subject" value="New VENTRYVO Beta Tester Application" />\n      <input type="hidden" name="submission-id" id="submission-id" value="" />
+      <input type="hidden" name="form-name" value="ventryvo-beta-testers" />
+      <input type="hidden" name="subject" value="New VENTRYVO Beta Tester Application" />
+      <input type="hidden" name="submission-id" id="submission-id" value="" />
       <p class="bot"><label>Don’t fill this out: <input name="bot-field" /></label></p>
 
       <h2>About you</h2>
@@ -153,10 +155,7 @@
       const form = document.querySelector('form[name="ventryvo-beta-testers"]');
       const submitButton = form.querySelector('button[type="submit"]');
       const submissionId = document.getElementById('submission-id');
-
-      if (!submissionId.value) {
-        submissionId.value = crypto.randomUUID();
-      }
+      if (!submissionId.value) submissionId.value = crypto.randomUUID();
 
       const groups = [
         { name: 'event-type', message: 'Please select at least one event type.' },
@@ -172,67 +171,77 @@
       };
 
       groups.forEach(group => {
-        const boxes = [...form.querySelectorAll(`input[name="${group.name}"]`)];
-        boxes.forEach(box => box.addEventListener('change', () => validateGroup(group)));
+        [...form.querySelectorAll(`input[name="${group.name}"]`)]
+          .forEach(box => box.addEventListener('change', () => validateGroup(group)));
       });
 
-      const formDataToObject = (formData) => {
-        const result = {};
-        for (const [key, value] of formData.entries()) {
-          if (key === 'bot-field') continue;
-          if (Object.prototype.hasOwnProperty.call(result, key)) {
-            result[key] = Array.isArray(result[key])
-              ? [...result[key], value]
-              : [result[key], value];
-          } else {
-            result[key] = value;
-          }
-        }
-        return result;
-      };
+      const checkedValues = (name) =>
+        [...form.querySelectorAll(`input[name="${name}"]:checked`)].map(el => el.value);
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
         let valid = true;
         groups.forEach(group => { if (!validateGroup(group)) valid = false; });
-
         if (!valid || !form.reportValidity()) return;
 
-        submitButton.disabled = true;
         const originalText = submitButton.textContent;
+        submitButton.disabled = true;
         submitButton.textContent = 'Submitting application…';
 
-        const formData = new FormData(form);
+        const data = new FormData(form);
+        const payload = {
+          submission_id: submissionId.value,
+          website_honeypot: data.get('bot-field') || '',
+          name: data.get('name') || '',
+          email: data.get('email') || '',
+          phone: data.get('phone') || '',
+          organization: data.get('organization') || '',
+          city_state: data.get('city-state') || '',
+          website_facebook: data.get('website-facebook') || '',
+          event_types: checkedValues('event-type'),
+          events_per_year: data.get('events-per-year') || '',
+          vendors_per_event: data.get('vendors-per-event') || '',
+          current_management: checkedValues('current-management'),
+          features_interested: checkedValues('features'),
+          use_real_event: data.get('use-real-event') || '',
+          report_bugs_feedback: data.get('report-bugs-feedback') || '',
+          biggest_headache: data.get('biggest-headache') || '',
+          indispensable_feature: data.get('indispensable-feature') || '',
+          feedback_conversations: data.get('feedback-conversations') || '',
+          anything_else: data.get('anything-else') || '',
+          beta_acknowledgement: data.get('beta-acknowledgement') === 'Accepted'
+        };
 
         try {
-          const netlifyResponse = await fetch('/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(formData).toString()
-          });
+          const response = await fetch(
+            'https://hzxiljqrqmtzsksxsdyj.supabase.co/functions/v1/submit-beta-application',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            }
+          );
 
-          if (!netlifyResponse.ok) {
-            throw new Error('Netlify form submission failed');
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || result.error) {
+            throw new Error(result.error || 'Unable to save application.');
           }
 
           try {
-            await fetch('/api/sync-beta', {
+            await fetch('/', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                form_name: 'ventryvo-beta-testers',
-                data: formDataToObject(formData)
-              })
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams(data).toString()
             });
-          } catch (syncError) {
-            console.error('VENTRYVO database sync failed; Netlify still has the submission.', syncError);
+          } catch (backupError) {
+            console.warn('Backup form copy was not saved.', backupError);
           }
 
           window.location.assign('/thank-you');
         } catch (error) {
           console.error(error);
-          alert('Your application could not be submitted. Please try again.');
+          alert(error.message || 'Your application could not be submitted. Please try again.');
           submitButton.disabled = false;
           submitButton.textContent = originalText;
         }
