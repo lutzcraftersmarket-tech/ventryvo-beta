@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Apply to beta test VENTRYVO, a vendor and event management platform for market and event coordinators." />
+  <title>VENTRYVO Beta Tester Application</title>
+  <style>
+    :root{
+      --ink:#172033; --muted:#667085; --line:#d9e0ea; --panel:#ffffff;
+      --bg:#f4f7fb; --accent:#2563eb; --accent2:#0f766e; --soft:#eef4ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#eef4ff 0,#f8fafc 340px,#f4f7fb 100%);color:var(--ink)}
+    .wrap{width:min(940px,calc(100% - 28px));margin:42px auto 64px}
+    .hero{background:linear-gradient(135deg,#172554,#1e3a8a 55%,#0f766e);color:white;border-radius:24px;padding:34px 34px 30px;box-shadow:0 18px 45px rgba(23,32,51,.16)}
+    .brand{font-size:14px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:.9}
+    h1{font-size:clamp(32px,5vw,50px);line-height:1.02;margin:10px 0 12px}
+    .tagline{font-size:18px;margin:0 0 18px;opacity:.92}
+    .free{display:inline-block;background:white;color:#0f5132;font-weight:800;border-radius:999px;padding:9px 14px;margin-top:4px}
+    .intro{margin-top:20px;max-width:780px;line-height:1.65;color:#e8eefc}
+    .card{background:var(--panel);border:1px solid rgba(217,224,234,.8);border-radius:22px;margin-top:22px;padding:30px;box-shadow:0 12px 32px rgba(23,32,51,.08)}
+    h2{margin:0 0 6px;font-size:22px}
+    .section-note{color:var(--muted);margin:0 0 24px;line-height:1.5}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .field{margin-bottom:20px}
+    .grid .field{margin-bottom:0}
+    label,.label{display:block;font-weight:700;margin-bottom:8px}
+    .req{color:#b42318}
+    input[type=text],input[type=email],input[type=tel],input[type=url],textarea,select{width:100%;padding:13px 14px;border:1px solid #cfd7e3;border-radius:12px;font:inherit;color:var(--ink);background:#fff;outline:none;transition:.2s}
+    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+    textarea{min-height:118px;resize:vertical}
+    .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+    .choice{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#fbfcfe}
+    .choice input{margin-top:3px}
+    .wide-choices{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .ack{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:15px}
+    .submit-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:26px}
+    button{appearance:none;border:0;border-radius:12px;padding:14px 22px;background:linear-gradient(135deg,var(--accent),#1d4ed8);color:white;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(37,99,235,.22)}
+    button:hover{filter:brightness(.98)}
+    .privacy{font-size:13px;color:var(--muted);line-height:1.4}
+    .bot{position:absolute;left:-9999px}
+    @media(max-width:720px){.wrap{margin-top:18px}.hero,.card{padding:22px}.grid,.choices,.wide-choices{grid-template-columns:1fr}.submit-row{align-items:stretch;flex-direction:column}.submit-row button{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="brand">VENTRYVO</div>
+      <h1>Beta Tester Application</h1>
+      <p class="tagline">Markets. Vendors. Events. One Place.</p>
+      <span class="free">Beta testing is completely free</span>
+      <p class="intro">VENTRYVO is an upcoming event-management platform being developed for craft markets, vendor events, festivals, pop-ups, farmers markets, and other vendor-based events. I’m looking for a limited number of coordinators to use the system in real-world situations, report bugs, suggest improvements, and help shape what comes next. Because this is beta software, some features may change and occasional bugs should be expected.</p>
+    </section>
+
+    <form class="card" name="ventryvo-beta-testers" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you.html">
+      <input type="hidden" name="form-name" value="ventryvo-beta-testers" />
+      <p class="bot"><label>Don’t fill this out: <input name="bot-field" /></label></p>
+
+      <h2>About you</h2>
+      <p class="section-note">Tell me a little about you and the events you coordinate.</p>
+      <div class="grid">
+        <div class="field"><label for="name">Your Name <span class="req">*</span></label><input id="name" name="name" type="text" required /></div>
+        <div class="field"><label for="email">Email Address <span class="req">*</span></label><input id="email" name="email" type="email" required /></div>
+        <div class="field"><label for="phone">Phone Number</label><input id="phone" name="phone" type="tel" /></div>
+        <div class="field"><label for="org">Organization / Market / Event Name <span class="req">*</span></label><input id="org" name="organization" type="text" required /></div>
+        <div class="field"><label for="city">City &amp; State <span class="req">*</span></label><input id="city" name="city-state" type="text" required /></div>
+        <div class="field"><label for="website">Website or Facebook Page</label><input id="website" name="website-facebook" type="url" placeholder="https://" /></div>
+      </div>
+
+      <div class="field" style="margin-top:24px">
+        <span class="label">What type of events do you coordinate? <span class="req">*</span></span>
+        <div class="choices wide-choices">
+          <label class="choice"><input type="checkbox" name="event-type" value="Craft Market" /> Craft Market</label>
+          <label class="choice"><input type="checkbox" name="event-type" value="Vendor Event" /> Vendor Event</label>
+          <label class="choice"><input type="checkbox" name="event-type" value="Festival" /> Festival</label>
+          <label class="choice"><input type="checkbox" name="event-type" value="Farmers Market" /> Farmers Market</label>
+          <label class="choice"><input type="checkbox" name="event-type" value="Pop-Up" /> Pop-Up</label>
+          <label class="choice"><input type="checkbox" name="event-type" value="Holiday Event" /> Holiday Event</label>
+          <label class="choice"><input type="checkbox" name="event-type" value="Nonprofit Event" /> Nonprofit Event</label>
+          <label class="choice"><input type="checkbox" name="event-type" value="Other" /> Other</label>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field"><label for="events-year">Approximately how many events do you coordinate each year? <span class="req">*</span></label><select id="events-year" name="events-per-year" required><option value="">Select one</option><option>1-3</option><option>4-6</option><option>7-12</option><option>13-24</option><option>25+</option></select></div>
+        <div class="field"><label for="vendors-event">Approximately how many vendors participate in a typical event? <span class="req">*</span></label><select id="vendors-event" name="vendors-per-event" required><option value="">Select one</option><option>Fewer than 10</option><option>10-25</option><option>26-50</option><option>51-100</option><option>More than 100</option></select></div>
+      </div>
+
+      <div class="field" style="margin-top:24px">
+        <span class="label">How do you currently manage your events? <span class="req">*</span></span>
+        <div class="choices wide-choices">
+          <label class="choice"><input type="checkbox" name="current-management" value="Spreadsheets" /> Spreadsheets</label>
+          <label class="choice"><input type="checkbox" name="current-management" value="Google Forms" /> Google Forms</label>
+          <label class="choice"><input type="checkbox" name="current-management" value="Paper/forms" /> Paper/forms</label>
+          <label class="choice"><input type="checkbox" name="current-management" value="Event-management software" /> Event-management software</label>
+          <label class="choice"><input type="checkbox" name="current-management" value="Multiple systems" /> Multiple systems</label>
+          <label class="choice"><input type="checkbox" name="current-management" value="Other" /> Other</label>
+        </div>
+      </div>
+
+      <h2 style="margin-top:34px">What you want to test</h2>
+      <p class="section-note">This helps me choose a mix of beta testers with different workflows and priorities.</p>
+      <div class="field">
+        <span class="label">Which VENTRYVO features are you most interested in testing? <span class="req">*</span></span>
+        <div class="choices wide-choices">
+          <label class="choice"><input type="checkbox" name="features" value="Vendor applications" /> Vendor applications</label>
+          <label class="choice"><input type="checkbox" name="features" value="Approvals/declines" /> Approvals/declines</label>
+          <label class="choice"><input type="checkbox" name="features" value="Wait lists" /> Wait lists</label>
+          <label class="choice"><input type="checkbox" name="features" value="Vendor database/history" /> Vendor database/history</label>
+          <label class="choice"><input type="checkbox" name="features" value="Category limits" /> Category limits</label>
+          <label class="choice"><input type="checkbox" name="features" value="Booth inventory" /> Booth inventory</label>
+          <label class="choice"><input type="checkbox" name="features" value="Invoicing" /> Invoicing</label>
+          <label class="choice"><input type="checkbox" name="features" value="Payments" /> Payments</label>
+          <label class="choice"><input type="checkbox" name="features" value="Monthly billing" /> Monthly billing</label>
+          <label class="choice"><input type="checkbox" name="features" value="Cancellations/credits" /> Cancellations/credits</label>
+          <label class="choice"><input type="checkbox" name="features" value="Check-in" /> Check-in</label>
+          <label class="choice"><input type="checkbox" name="features" value="Attendance/no-shows" /> Attendance/no-shows</label>
+          <label class="choice"><input type="checkbox" name="features" value="Email communications" /> Email communications</label>
+          <label class="choice"><input type="checkbox" name="features" value="Reports" /> Reports</label>
+          <label class="choice"><input type="checkbox" name="features" value="Floor plans" /> Floor plans</label>
+          <label class="choice"><input type="checkbox" name="features" value="Staff access" /> Staff access</label>
+          <label class="choice"><input type="checkbox" name="features" value="Vendor portal" /> Vendor portal</label>
+          <label class="choice"><input type="checkbox" name="features" value="Shopper RSVPs" /> Shopper RSVPs</label>
+          <label class="choice"><input type="checkbox" name="features" value="Multi-event management" /> Multi-event management</label>
+          <label class="choice"><input type="checkbox" name="features" value="Other" /> Other</label>
+        </div>
+      </div>
+
+      <div class="field"><label for="real-event">Would you be willing to use VENTRYVO to manage an actual upcoming event during beta testing? <span class="req">*</span></label><select id="real-event" name="use-real-event" required><option value="">Select one</option><option>Yes</option><option>Possibly</option><option>Not yet</option></select></div>
+      <div class="field"><label for="feedback">Are you willing to report bugs and provide feedback while testing? <span class="req">*</span></label><select id="feedback" name="report-bugs-feedback" required><option value="">Select one</option><option>Yes</option><option>No</option></select></div>
+      <div class="field"><label for="headache">What is the biggest headache you currently have when managing vendors or events? <span class="req">*</span></label><textarea id="headache" name="biggest-headache" required></textarea></div>
+      <div class="field"><label for="indispensable">What feature would make event-management software indispensable to you?</label><textarea id="indispensable" name="indispensable-feature"></textarea></div>
+      <div class="field"><label for="conversation">Would you be willing to participate in occasional feedback conversations during the beta? <span class="req">*</span></label><select id="conversation" name="feedback-conversations" required><option value="">Select one</option><option>Yes</option><option>Maybe</option><option>No</option></select></div>
+      <div class="field"><label for="anything">Anything else you’d like me to know?</label><textarea id="anything" name="anything-else"></textarea></div>
+
+      <div class="field ack">
+        <label class="choice" style="border:0;background:transparent;padding:0">
+          <input type="checkbox" name="beta-acknowledgement" value="Accepted" required />
+          <span>I understand VENTRYVO is currently beta software, features may change, and bugs may occur. I understand there is no charge to participate in beta testing. <span class="req">*</span></span>
+        </label>
+      </div>
+
+      <div class="submit-row">
+        <div class="privacy">Submitting this application does not guarantee selection for the beta. Your information will be used to contact you about VENTRYVO beta testing.</div>
+        <button type="submit">Apply to Beta Test VENTRYVO</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('form[name="ventryvo-beta-testers"]');
+      const groups = [
+        { name: 'event-type', message: 'Please select at least one event type.' },
+        { name: 'current-management', message: 'Please select at least one way you currently manage events.' },
+        { name: 'features', message: 'Please select at least one VENTRYVO feature you want to test.' }
+      ];
+      const validateGroup = (group) => {
+        const boxes = [...form.querySelectorAll(`input[name="${group.name}"]`)];
+        const ok = boxes.some(b => b.checked);
+        boxes[0].setCustomValidity(ok ? '' : group.message);
+        return ok;
+      };
+      groups.forEach(group => {
+        const boxes = [...form.querySelectorAll(`input[name="${group.name}"]`)];
+        boxes.forEach(box => box.addEventListener('change', () => validateGroup(group)));
+      });
+      form.addEventListener('submit', (e) => {
+        let ok = true;
+        groups.forEach(group => { if (!validateGroup(group)) ok = false; });
+        if (!ok) {
+          e.preventDefault();
+          form.reportValidity();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
