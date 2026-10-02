@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Set Up Your VENTRYVO Account</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#d9e0ea;--bg:#f5f7fb;--blue:#1d4ed8;--navy:#172554;--green:#0f766e}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{width:min(760px,calc(100% - 28px));margin:32px auto 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+.brand{font-weight:900;letter-spacing:.13em;color:var(--navy)}
+.badge{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:7px 10px;border-radius:999px;background:#eef2ff;color:#3730a3}
+.hero,.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:0 8px 24px rgba(23,32,51,.05)}
+.hero h1{font-size:clamp(30px,5vw,44px);line-height:1.08;margin:8px 0 10px;color:var(--navy)}
+.hero p,.muted{color:var(--muted);line-height:1.6}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.step{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px}.step b{display:block;color:var(--navy);font-size:13px;margin-bottom:3px}.step span{font-size:12px;color:var(--muted)}
+.card{margin-top:16px}
+label{display:block;font-weight:750;margin:14px 0 7px}
+input{width:100%;padding:12px 13px;border:1px solid #cfd7e3;border-radius:10px;font:inherit}
+input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,78,216,.10)}
+button{border:0;border-radius:10px;background:var(--blue);color:#fff;font:inherit;font-weight:800;padding:13px 18px;cursor:pointer;width:100%;margin-top:18px}
+button:disabled{opacity:.6;cursor:not-allowed}
+.notice{margin-top:14px;padding:12px 14px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:13px;line-height:1.5}
+.error{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
+.hidden{display:none!important}
+@media(max-width:650px){.steps{grid-template-columns:1fr}.hero,.card{padding:21px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><div class="brand">VENTRYVO</div><div class="badge">Beta Access</div></div>
+
+  <section class="hero">
+    <div style="font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1d4ed8">Account Setup</div>
+    <h1>Welcome to VENTRYVO.</h1>
+    <p>Your beta application has been approved. Finish setting up your account below, then you’ll be taken directly into your organization’s VENTRYVO workspace.</p>
+    <div class="steps">
+      <div class="step"><b>1. Secure your account</b><span>Create the password you’ll use to sign in.</span></div>
+      <div class="step"><b>2. Confirm your workspace</b><span>Review the organization attached to your account.</span></div>
+      <div class="step"><b>3. Start configuring</b><span>Continue into your VENTRYVO customer portal.</span></div>
+    </div>
+  </section>
+
+  <section id="loading" class="card"><b>Checking your invitation…</b><p class="muted">This should only take a moment.</p></section>
+
+  <section id="setupCard" class="card hidden">
+    <h2 style="margin-top:0">Complete account setup</h2>
+    <p id="accountInfo" class="muted"></p>
+
+    <label for="fullName">Your name</label>
+    <input id="fullName" autocomplete="name">
+
+    <label for="organization">Organization</label>
+    <input id="organization">
+
+    <label for="password">Create password</label>
+    <input id="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters">
+
+    <label for="confirmPassword">Confirm password</label>
+    <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8">
+
+    <button id="completeBtn">Complete Setup & Open VENTRYVO</button>
+    <div class="notice">Beta access is currently provided at no charge. Your organization’s data is kept separate from other VENTRYVO customer workspaces.</div>
+    <div id="message" class="notice error hidden"></div>
+  </section>
+
+  <section id="invalidCard" class="card hidden">
+    <h2 style="margin-top:0">Open your VENTRYVO invitation email</h2>
+    <p class="muted">This setup page needs the secure invitation session from the email VENTRYVO sent you. Open the setup link in that email again. If the link has expired, contact the VENTRYVO administrator for a new invitation.</p>
+  </section>
+</main>
+
+<script type="module">
+import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "/js/supabase-config.js";
+const sb=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const $=id=>document.getElementById(id);
+let user=null,membership=null;
+
+function showError(text){
+ $("message").textContent=text;$("message").classList.remove("hidden");
+}
+
+async function loadSetup(){
+ const {data:{user:currentUser}}=await sb.auth.getUser();
+ if(!currentUser){
+   $("loading").classList.add("hidden");
+   $("invalidCard").classList.remove("hidden");
+   return;
+ }
+ user=currentUser;
+
+ const {data,error}=await sb
+   .from("organization_memberships")
+   .select("role,organization_id,organizations(id,name,status)")
+   .eq("user_id",user.id)
+   .eq("status","active")
+   .limit(1)
+   .maybeSingle();
+
+ if(error||!data){
+   $("loading").classList.add("hidden");
+   $("invalidCard").classList.remove("hidden");
+   return;
+ }
+
+ membership=data;
+ $("fullName").value=user.user_metadata?.full_name||"";
+ $("organization").value=membership.organizations?.name||"";
+ $("accountInfo").textContent=(user.email||"")+" • "+(membership.role||"member")+" access";
+ $("loading").classList.add("hidden");
+ $("setupCard").classList.remove("hidden");
+}
+
+$("completeBtn").onclick=async()=>{
+ $("message").classList.add("hidden");
+ const password=$("password").value;
+ const confirm=$("confirmPassword").value;
+ const fullName=$("fullName").value.trim();
+ const organization=$("organization").value.trim();
+
+ if(password.length<8)return showError("Please use a password with at least 8 characters.");
+ if(password!==confirm)return showError("The passwords do not match.");
+ if(!organization)return showError("Organization name is required.");
+
+ $("completeBtn").disabled=true;
+ $("completeBtn").textContent="Completing setup…";
+
+ const {error:userError}=await sb.auth.updateUser({
+   password,
+   data:{full_name:fullName}
+ });
+
+ if(userError){
+   $("completeBtn").disabled=false;
+   $("completeBtn").textContent="Complete Setup & Open VENTRYVO";
+   return showError(userError.message);
+ }
+
+ if(membership?.role==="owner"||membership?.role==="admin"){
+   const {error:orgError}=await sb
+     .from("organizations")
+     .update({name:organization})
+     .eq("id",membership.organization_id);
+   if(orgError){
+     $("completeBtn").disabled=false;
+     $("completeBtn").textContent="Complete Setup & Open VENTRYVO";
+     return showError(orgError.message);
+   }
+ }
+
+ location.assign("/app");
+};
+
+sb.auth.onAuthStateChange(()=>setTimeout(loadSetup,0));
+setTimeout(loadSetup,150);
+</script>
+</body></html>
