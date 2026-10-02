@@ -22,7 +22,7 @@ function arrayValue(value: unknown): string[] {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") {
+  if (req.method !== "GET" && req.method !== "POST") {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
@@ -57,6 +57,10 @@ Deno.serve(async (req: Request) => {
 
   if (!secretRow || secretRow.token_hash !== tokenHash) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (req.method === "GET") {
+    return Response.json({ ok: true, service: "netlify-beta-form" });
   }
 
   let body: Record<string, unknown>;
