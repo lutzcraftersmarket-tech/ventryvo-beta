@@ -58,6 +58,23 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;bor
 <h2>Create Customer Organization</h2><div class="grid"><input id="orgName" placeholder="Organization name"><input id="orgSlug" placeholder="URL slug, e.g. trinity-crafters"></div>
 <div class="right"><button id="createOrgBtn" class="primary">Create Organization</button></div>
 </div>
+<div class="panel no-print">
+<h2>Invite / Add Member</h2>
+<div class="grid">
+  <select id="inviteOrg"><option value="">Select organization</option></select>
+  <input id="inviteName" placeholder="Customer name">
+  <input id="inviteEmail" type="email" placeholder="Customer email">
+  <select id="inviteRole">
+    <option value="owner">Owner</option>
+    <option value="admin">Admin</option>
+    <option value="manager">Manager</option>
+    <option value="staff">Staff</option>
+    <option value="read_only">Read only</option>
+  </select>
+</div>
+<div class="right"><button id="inviteBtn" class="primary">Invite Customer</button></div>
+<p id="inviteMsg" class="muted"></p>
+</div>
 <div class="panel"><h2>Customer Accounts</h2><div id="orgs"></div></div>
 </section>
 
@@ -115,6 +132,7 @@ function renderApps(){
  document.querySelectorAll(".saveNote").forEach(el=>el.onclick=async()=>{const ta=document.querySelector('[data-note="'+el.dataset.id+'"]');await sb.from("beta_test_applications").update({admin_notes:ta.value}).eq("id",el.dataset.id);el.textContent="Saved";setTimeout(()=>el.textContent="Save Notes",900)});
 }
 function renderOrgs(){
+ $("inviteOrg").innerHTML='<option value="">Select organization</option>'+orgs.map(o=>'<option value="'+o.id+'">'+esc(o.name)+'</option>').join("");
  $("orgs").innerHTML=orgs.length?'<table><thead><tr><th>Organization</th><th>Status</th><th>Created</th></tr></thead><tbody>'+orgs.map(o=>`<tr><td><b>${esc(o.name)}</b><br><small>${esc(o.slug)}</small></td><td><select class="orgStatus" data-id="${o.id}"><option ${o.status==="active"?"selected":""}>active</option><option ${o.status==="trial"?"selected":""}>trial</option><option ${o.status==="suspended"?"selected":""}>suspended</option><option ${o.status==="closed"?"selected":""}>closed</option></select></td><td>${new Date(o.created_at).toLocaleDateString()}</td></tr>`).join("")+'</tbody></table>':'<div class="empty">No customer organizations yet.</div>';
  document.querySelectorAll(".orgStatus").forEach(el=>el.onchange=async()=>{await sb.from("organizations").update({status:el.value}).eq("id",el.dataset.id);await loadAll()});
 }
@@ -132,6 +150,22 @@ $("search").oninput=renderApps;$("statusFilter").onchange=renderApps;
 $("csvBtn").onclick=()=>{const cols=["created_at","status","name","email","phone","organization","city_state","event_types","events_per_year","vendors_per_event","current_management","features_interested","use_real_event","report_bugs_feedback","biggest_headache","indispensable_feature","feedback_conversations","anything_else","admin_notes"];const csv=[cols.join(",")].concat(apps.map(r=>cols.map(c=>'"'+String(Array.isArray(r[c])?r[c].join("; "):(r[c]??"")).replaceAll('"','""')+'"').join(","))).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="ventryvo-beta-applications.csv";a.click();URL.revokeObjectURL(a.href)};
 $("pdfBtn").onclick=()=>window.print();
 $("createOrgBtn").onclick=async()=>{const name=$("orgName").value.trim(),slug=$("orgSlug").value.trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-|-$/g,"");if(!name||!slug)return alert("Enter organization name and slug.");const {error}=await sb.from("organizations").insert({name,slug,status:"trial"});if(error)return alert(error.message);$("orgName").value="";$("orgSlug").value="";await loadAll()};
+$("inviteBtn").onclick=async()=>{
+ const orgId=$("inviteOrg").value,email=$("inviteEmail").value.trim(),fullName=$("inviteName").value.trim(),role=$("inviteRole").value;
+ if(!orgId||!email){$("inviteMsg").textContent="Select an organization and enter an email.";return}
+ $("inviteMsg").textContent="Sending invitation…";
+ const {data:{session}}=await sb.auth.getSession();
+ if(!session){$("inviteMsg").textContent="Your admin session expired. Sign in again.";return}
+ const response=await fetch("https://hzxiljqrqmtzsksxsdyj.supabase.co/functions/v1/master-admin-api",{
+   method:"POST",
+   headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+   body:JSON.stringify({action:"invite_customer",organization_id:orgId,email,full_name:fullName,role})
+ });
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok||result.error){$("inviteMsg").textContent=result.error||"Unable to invite customer.";return}
+ $("inviteMsg").textContent=result.invited?"Invitation sent and membership created.":"Existing user added to the organization.";
+ $("inviteEmail").value="";$("inviteName").value="";
+};
 $("releaseBtn").onclick=async()=>{const version=$("releaseVersion").value.trim(),title=$("releaseTitle").value.trim();if(!version||!title)return alert("Enter version and title.");const {error}=await sb.from("platform_releases").insert({version,title,notes:$("releaseNotes").value.trim(),status:"released",released_at:new Date().toISOString()});if(error)return alert(error.message);$("releaseVersion").value="";$("releaseTitle").value="";$("releaseNotes").value="";await loadAll()};
 sb.auth.onAuthStateChange(()=>setTimeout(boot,0));boot();
 </script>
