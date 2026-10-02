@@ -54,7 +54,7 @@
     </section>
 
     <form class="card" name="ventryvo-beta-testers" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you">
-      <input type="hidden" name="form-name" value="ventryvo-beta-testers" />
+      <input type="hidden" name="form-name" value="ventryvo-beta-testers" />\n      <input type="hidden" name="subject" value="New VENTRYVO Beta Tester Application" />\n      <input type="hidden" name="submission-id" id="submission-id" value="" />
       <p class="bot"><label>Don’t fill this out: <input name="bot-field" /></label></p>
 
       <h2>About you</h2>
@@ -151,27 +151,90 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.querySelector('form[name="ventryvo-beta-testers"]');
+      const submitButton = form.querySelector('button[type="submit"]');
+      const submissionId = document.getElementById('submission-id');
+
+      if (!submissionId.value) {
+        submissionId.value = crypto.randomUUID();
+      }
+
       const groups = [
         { name: 'event-type', message: 'Please select at least one event type.' },
         { name: 'current-management', message: 'Please select at least one way you currently manage events.' },
         { name: 'features', message: 'Please select at least one VENTRYVO feature you want to test.' }
       ];
+
       const validateGroup = (group) => {
         const boxes = [...form.querySelectorAll(`input[name="${group.name}"]`)];
         const ok = boxes.some(b => b.checked);
         boxes[0].setCustomValidity(ok ? '' : group.message);
         return ok;
       };
+
       groups.forEach(group => {
         const boxes = [...form.querySelectorAll(`input[name="${group.name}"]`)];
         boxes.forEach(box => box.addEventListener('change', () => validateGroup(group)));
       });
-      form.addEventListener('submit', (e) => {
-        let ok = true;
-        groups.forEach(group => { if (!validateGroup(group)) ok = false; });
-        if (!ok) {
-          e.preventDefault();
-          form.reportValidity();
+
+      const formDataToObject = (formData) => {
+        const result = {};
+        for (const [key, value] of formData.entries()) {
+          if (key === 'bot-field') continue;
+          if (Object.prototype.hasOwnProperty.call(result, key)) {
+            result[key] = Array.isArray(result[key])
+              ? [...result[key], value]
+              : [result[key], value];
+          } else {
+            result[key] = value;
+          }
+        }
+        return result;
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        let valid = true;
+        groups.forEach(group => { if (!validateGroup(group)) valid = false; });
+
+        if (!valid || !form.reportValidity()) return;
+
+        submitButton.disabled = true;
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Submitting application…';
+
+        const formData = new FormData(form);
+
+        try {
+          const netlifyResponse = await fetch('/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(formData).toString()
+          });
+
+          if (!netlifyResponse.ok) {
+            throw new Error('Netlify form submission failed');
+          }
+
+          try {
+            await fetch('/api/sync-beta', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                form_name: 'ventryvo-beta-testers',
+                data: formDataToObject(formData)
+              })
+            });
+          } catch (syncError) {
+            console.error('VENTRYVO database sync failed; Netlify still has the submission.', syncError);
+          }
+
+          window.location.assign('/thank-you');
+        } catch (error) {
+          console.error(error);
+          alert('Your application could not be submitted. Please try again.');
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
         }
       });
     });
