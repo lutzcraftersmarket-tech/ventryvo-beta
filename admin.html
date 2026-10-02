@@ -126,10 +126,34 @@ function renderApps(){
  <div class="cols"><div><b>Event types</b><div class="chips">${chips(x.event_types)}</div><p><b>Events/year:</b> ${esc(x.events_per_year)}<br><b>Typical vendors:</b> ${esc(x.vendors_per_event)}<br><b>Real event:</b> ${esc(x.use_real_event)}<br><b>Feedback:</b> ${esc(x.report_bugs_feedback)}</p></div>
  <div><b>Interested in</b><div class="chips">${chips(x.features_interested)}</div><p><b>Current tools:</b> ${esc((x.current_management||[]).join(", "))}</p></div></div>
  <div><p><b>Biggest headache:</b> ${esc(x.biggest_headache)}</p>${x.indispensable_feature?'<p><b>Indispensable feature:</b> '+esc(x.indispensable_feature)+'</p>':""}${x.anything_else?'<p><b>Anything else:</b> '+esc(x.anything_else)+'</p>':""}</div>
- <div class="notes"><textarea data-note="${x.id}" placeholder="Private admin notes">${esc(x.admin_notes||"")}</textarea><div class="right no-print"><button class="saveNote light" data-id="${x.id}">Save Notes</button></div></div>
+ <div class="notes"><textarea data-note="${x.id}" placeholder="Private admin notes">${esc(x.admin_notes||"")}</textarea><div class="right no-print">${x.status==="selected"&&x.selected_organization_id?'<span class="muted" style="align-self:center">Beta account created</span>':'<button class="approveBeta primary" data-id="'+x.id+'">Approve & Send Setup Link</button>'}<button class="saveNote light" data-id="${x.id}">Save Notes</button></div></div>
  </article>`).join(""):'<div class="empty">No applications match.</div>';
  document.querySelectorAll(".status").forEach(el=>el.onchange=async()=>{await sb.from("beta_test_applications").update({status:el.value,reviewed_at:new Date().toISOString()}).eq("id",el.dataset.id);await loadAll()});
  document.querySelectorAll(".saveNote").forEach(el=>el.onclick=async()=>{const ta=document.querySelector('[data-note="'+el.dataset.id+'"]');await sb.from("beta_test_applications").update({admin_notes:ta.value}).eq("id",el.dataset.id);el.textContent="Saved";setTimeout(()=>el.textContent="Save Notes",900)});
+ document.querySelectorAll(".approveBeta").forEach(el=>el.onclick=async()=>{
+   const app=apps.find(x=>x.id===el.dataset.id);
+   if(!app)return;
+   if(!confirm("Approve "+app.name+" for the VENTRYVO beta and send the account setup invitation to "+app.email+"?"))return;
+   const original=el.textContent;
+   el.disabled=true;el.textContent="Creating account & sending…";
+   const {data:{session}}=await sb.auth.getSession();
+   if(!session){alert("Your admin session expired. Sign in again.");location.reload();return}
+   const response=await fetch("https://hzxiljqrqmtzsksxsdyj.supabase.co/functions/v1/master-admin-api",{
+     method:"POST",
+     headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+     body:JSON.stringify({action:"approve_beta_tester",application_id:el.dataset.id})
+   });
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok||result.error){
+     el.disabled=false;el.textContent=original;
+     alert(result.error||"Unable to create the beta account.");
+     return;
+   }
+   alert(result.invited
+     ?"Approved. VENTRYVO created the organization and sent the setup invitation to "+result.email+"."
+     :"Approved. The user already had a VENTRYVO login, so the organization was linked to their account.");
+   await loadAll();
+ });
 }
 function renderOrgs(){
  $("inviteOrg").innerHTML='<option value="">Select organization</option>'+orgs.map(o=>'<option value="'+o.id+'">'+esc(o.name)+'</option>').join("");
