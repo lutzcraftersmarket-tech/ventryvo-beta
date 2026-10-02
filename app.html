@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VENTRYVO Customer Portal</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#d9e0ea;--bg:#f4f7fb;--blue:#2563eb;--navy:#172554;--green:#0f766e}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+.shell{width:min(1180px,calc(100% - 28px));margin:26px auto 60px}.hidden{display:none!important}.login{width:min(500px,calc(100% - 28px));margin:70px auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}
+header{background:linear-gradient(135deg,var(--navy),#1e3a8a 58%,var(--green));color:#fff;padding:22px 24px;border-radius:20px;display:flex;justify-content:space-between;gap:16px;align-items:center}.brand{font-weight:900;letter-spacing:.13em}
+input,select{width:100%;padding:11px 12px;border:1px solid #cfd7e3;border-radius:9px;font:inherit}button,.btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--blue);color:#fff}.light{background:#fff;border:1px solid var(--line)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}.card strong{font-size:28px;display:block}.muted{color:var(--muted)}.nav{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.nav button.active{background:var(--blue);color:#fff}.feature{display:inline-block;background:#eef4ff;border-radius:999px;padding:6px 9px;margin:4px;font-size:12px}
+@media(max-width:850px){.cards{grid-template-columns:repeat(2,1fr)}header{flex-direction:column;align-items:flex-start}}
+</style></head><body>
+<section id="login" class="login"><div class="brand" style="color:#1d4ed8">VENTRYVO</div><h1>Customer Portal</h1><p class="muted">Sign in with the account attached to your organization.</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password" style="margin-top:8px"><button id="loginBtn" class="primary" style="margin-top:10px">Sign In</button><p id="msg" class="muted"></p></section>
+<main id="app" class="shell hidden"><header><div><div class="brand">VENTRYVO</div><div id="orgTitle" style="opacity:.82;margin-top:4px">Customer Workspace</div></div><button id="logoutBtn" class="light">Sign Out</button></header>
+<div class="cards"><div class="card"><strong id="eventsCount">0</strong><span>Events</span></div><div class="card"><strong id="vendorsCount">0</strong><span>Vendors</span></div><div class="card"><strong id="appsCount">0</strong><span>Applications</span></div><div class="card"><strong id="invoicesCount">0</strong><span>Invoices</span></div></div>
+<div class="nav"><button class="active">Dashboard</button><button>Events</button><button>Vendors</button><button>Applications</button><button>Billing</button><button>Staff</button><button>Reports</button></div>
+<section class="panel"><h2>Your VENTRYVO System</h2><p id="membership" class="muted"></p><h3>Enabled Features</h3><div id="features"></div></section>
+<section class="panel"><h2>Platform Updates</h2><p class="muted">VENTRYVO uses one shared application codebase. Platform fixes and security updates deploy automatically to all customer workspaces. New features can be staged with account-level feature flags.</p><div id="release"></div></section>
+</main>
+<script type="module">
+import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "/js/supabase-config.js";
+const sb=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY),$=id=>document.getElementById(id);
+async function boot(){
+ const {data:{user}}=await sb.auth.getUser();if(!user){$("login").classList.remove("hidden");$("app").classList.add("hidden");return}
+ const {data:m,error}=await sb.from("organization_memberships").select("role,organization_id,organizations(id,name,slug,status)").eq("user_id",user.id).eq("status","active").limit(1).maybeSingle();
+ if(error||!m){$("msg").textContent="Your login works, but no VENTRYVO organization has been assigned to this account yet.";await sb.auth.signOut();return}
+ const org=m.organizations;$("login").classList.add("hidden");$("app").classList.remove("hidden");$("orgTitle").textContent=org.name;$("membership").textContent="Role: "+m.role+" • Account status: "+org.status;
+ const orgId=org.id;
+ const [e,v,a,i,flags,overrides,rel]=await Promise.all([
+  sb.from("events").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
+  sb.from("vendors").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
+  sb.from("event_applications").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
+  sb.from("invoices").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
+  sb.from("feature_flags").select("*"),
+  sb.from("organization_feature_overrides").select("feature_flag_id,enabled").eq("organization_id",orgId),
+  sb.from("platform_releases").select("*").eq("status","released").order("released_at",{ascending:false}).limit(1).maybeSingle()
+ ]);
+ $("eventsCount").textContent=e.count||0;$("vendorsCount").textContent=v.count||0;$("appsCount").textContent=a.count||0;$("invoicesCount").textContent=i.count||0;
+ const map=new Map((overrides.data||[]).map(x=>[x.feature_flag_id,x.enabled]));
+ const enabled=(flags.data||[]).filter(f=>map.has(f.id)?map.get(f.id):f.default_enabled);
+ $("features").innerHTML=enabled.length?enabled.map(f=>'<span class="feature">'+f.name+'</span>').join(""):'<span class="muted">No optional features enabled yet.</span>';
+ $("release").innerHTML=rel.data?'<b>'+rel.data.version+' — '+rel.data.title+'</b><p>'+((rel.data.notes)||"")+'</p>':'<span class="muted">No release notes yet.</span>';
+}
+$("loginBtn").onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error)$("msg").textContent=error.message;else boot()};
+$("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.reload()};sb.auth.onAuthStateChange(()=>setTimeout(boot,0));boot();
+</script></body></html>
