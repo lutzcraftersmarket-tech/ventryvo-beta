@@ -38,7 +38,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
     <h1>Welcome to VENTRYVO.</h1>
     <p>Your beta application has been approved. Finish setting up your account below, then you’ll be taken directly into your organization’s VENTRYVO workspace.</p>
     <div class="steps">
-      <div class="step"><b>1. Secure your account</b><span>Create the password you’ll use to sign in.</span></div>
+      <div class="step"><b>1. Secure your account</b><span>Your invitation securely confirms your email.</span></div>
       <div class="step"><b>2. Confirm your workspace</b><span>Review the organization attached to your account.</span></div>
       <div class="step"><b>3. Start configuring</b><span>Continue into your VENTRYVO customer portal.</span></div>
     </div>
@@ -47,7 +47,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
   <section id="loading" class="card"><b>Checking your invitation…</b><p class="muted">This should only take a moment.</p></section>
 
   <section id="setupCard" class="card hidden">
-    <h2 style="margin-top:0">Complete account setup</h2>
+    <h2 style="margin-top:0">Confirm account details</h2>
     <p id="accountInfo" class="muted"></p>
 
     <label for="fullName">Your name</label>
@@ -56,13 +56,8 @@ button:disabled{opacity:.6;cursor:not-allowed}
     <label for="organization">Organization</label>
     <input id="organization">
 
-    <label for="password">Create password</label>
-    <input id="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters">
-
-    <label for="confirmPassword">Confirm password</label>
-    <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8">
-
-    <button id="completeBtn">Complete Setup & Open VENTRYVO</button>
+    <div class="notice">VENTRYVO uses passwordless email sign-in. You won’t need to create or remember a password.</div>
+    <button id="completeBtn">Confirm Account & Open VENTRYVO</button>
     <div class="notice">Beta access is currently provided at no charge. Your organization’s data is kept separate from other VENTRYVO customer workspaces.</div>
     <div id="message" class="notice error hidden"></div>
   </section>
@@ -117,26 +112,21 @@ async function loadSetup(){
 
 $("completeBtn").onclick=async()=>{
  $("message").classList.add("hidden");
- const password=$("password").value;
- const confirm=$("confirmPassword").value;
  const fullName=$("fullName").value.trim();
  const organization=$("organization").value.trim();
 
- if(password.length<8)return showError("Please use a password with at least 8 characters.");
- if(password!==confirm)return showError("The passwords do not match.");
  if(!organization)return showError("Organization name is required.");
 
  $("completeBtn").disabled=true;
  $("completeBtn").textContent="Completing setup…";
 
  const {error:userError}=await sb.auth.updateUser({
-   password,
    data:{full_name:fullName}
  });
 
  if(userError){
    $("completeBtn").disabled=false;
-   $("completeBtn").textContent="Complete Setup & Open VENTRYVO";
+   $("completeBtn").textContent="Confirm Account & Open VENTRYVO";
    return showError(userError.message);
  }
 

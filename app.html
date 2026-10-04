@@ -91,10 +91,20 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
 <section id="login" class="login">
  <div class="brand">VENTRYVO</div>
  <h1>Customer Portal</h1>
- <p class="muted">Sign in with the account attached to your organization.</p>
- <input id="email" type="email" autocomplete="email" placeholder="Email">
- <input id="password" type="password" autocomplete="current-password" placeholder="Password">
- <button id="loginBtn" class="primary" style="width:100%;margin-top:10px">Sign In</button>
+ <p class="muted">Enter the email attached to your organization. We’ll send a one-time sign-in code.</p>
+ <div id="emailStage">
+  <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="Email">
+  <button id="loginBtn" class="primary" style="width:100%;margin-top:10px">Email Me a Sign-In Code</button>
+ </div>
+ <div id="codeStage" class="hidden">
+  <p id="codeSentTo" class="muted"></p>
+  <input id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="6-digit code" style="font-size:24px;letter-spacing:.18em;text-align:center">
+  <button id="verifyBtn" class="primary" style="width:100%;margin-top:10px">Verify Code & Sign In</button>
+  <div style="display:flex;gap:8px;margin-top:8px">
+   <button id="resendBtn" class="secondary" style="flex:1">Send New Code</button>
+   <button id="changeEmailBtn" class="secondary" style="flex:1">Change Email</button>
+  </div>
+ </div>
  <p id="msg" class="muted"></p>
 </section>
 
@@ -238,6 +248,6 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
 </main>
 
 <div id="toast" class="toast hidden"></div>
-<script type="module" src="/js/customer-portal.js?v=20261004-core1"></script>
+<script type="module" src="/js/customer-portal.js?v=20261004-otp1"></script>
 </body>
 </html>

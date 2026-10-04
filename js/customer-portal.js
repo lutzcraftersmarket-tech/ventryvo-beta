@@ -418,13 +418,47 @@ async function finishSetup(){
  await loadWorkspace();setPanel("dashboard");toast("Core VENTRYVO setup is complete.");
 }
 
-byId("loginBtn").onclick=async function(){
- byId("msg").textContent="Signing in…";
- const result=await sb.auth.signInWithPassword({email:byId("email").value.trim(),password:byId("password").value});
+let pendingLoginEmail="";
+async function requestLoginCode(){
+ const email=byId("email").value.trim().toLowerCase();
+ if(!email){byId("msg").textContent="Enter your email address.";return;}
+ byId("msg").textContent="Sending your sign-in code…";
+ byId("loginBtn").disabled=true;
+ const result=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
+ byId("loginBtn").disabled=false;
  if(result.error){byId("msg").textContent=result.error.message;return;}
+ pendingLoginEmail=email;
+ byId("emailStage").classList.add("hidden");
+ byId("codeStage").classList.remove("hidden");
+ byId("codeSentTo").textContent="We sent a 6-digit sign-in code to "+email+".";
+ byId("msg").textContent="Enter the code from your email.";
+ byId("otpCode").value="";
+ setTimeout(()=>byId("otpCode").focus(),50);
+}
+async function verifyLoginCode(){
+ const token=byId("otpCode").value.replace(/\D/g,"").slice(0,6);
+ if(token.length!==6){byId("msg").textContent="Enter the 6-digit code from your email.";return;}
+ byId("verifyBtn").disabled=true;
+ byId("msg").textContent="Verifying code…";
+ const result=await sb.auth.verifyOtp({email:pendingLoginEmail,token,type:"email"});
+ byId("verifyBtn").disabled=false;
+ if(result.error){byId("msg").textContent="That code is invalid or expired. Request a new code and try again.";return;}
+ byId("msg").textContent="";
  await boot();
+}
+byId("loginBtn").onclick=requestLoginCode;
+byId("verifyBtn").onclick=verifyLoginCode;
+byId("resendBtn").onclick=requestLoginCode;
+byId("changeEmailBtn").onclick=function(){
+ pendingLoginEmail="";
+ byId("codeStage").classList.add("hidden");
+ byId("emailStage").classList.remove("hidden");
+ byId("msg").textContent="";
+ setTimeout(()=>byId("email").focus(),50);
 };
-byId("password").addEventListener("keydown",function(e){if(e.key==="Enter")byId("loginBtn").click();});
+byId("email").addEventListener("keydown",function(e){if(e.key==="Enter")requestLoginCode();});
+byId("otpCode").addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,6);});
+byId("otpCode").addEventListener("keydown",function(e){if(e.key==="Enter")verifyLoginCode();});
 byId("logoutBtn").onclick=async function(){await sb.auth.signOut();location.reload();};
 byId("continueSetupBtn").onclick=function(){setPanel("setup");showSetupStep(nextSetupStep());};
 document.querySelectorAll("[data-nav]").forEach(function(btn){btn.onclick=function(){setPanel(btn.dataset.nav);};});
