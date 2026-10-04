@@ -98,7 +98,7 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
  </div>
  <div id="codeStage" class="hidden">
   <p id="codeSentTo" class="muted"></p>
-  <input id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="6-digit code" style="font-size:24px;letter-spacing:.18em;text-align:center">
+  <input id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="10" placeholder="Enter sign-in code" style="font-size:24px;letter-spacing:.18em;text-align:center">
   <button id="verifyBtn" class="primary" style="width:100%;margin-top:10px">Verify Code & Sign In</button>
   <div style="display:flex;gap:8px;margin-top:8px">
    <button id="resendBtn" class="secondary" style="flex:1">Send New Code</button>
@@ -248,6 +248,6 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
 </main>
 
 <div id="toast" class="toast hidden"></div>
-<script type="module" src="/js/customer-portal.js?v=20261004-otp1"></script>
+<script type="module" src="/js/customer-portal.js?v=20261004-otp2"></script>
 </body>
 </html>

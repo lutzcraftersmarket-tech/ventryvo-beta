@@ -436,8 +436,8 @@ async function requestLoginCode(){
  setTimeout(()=>byId("otpCode").focus(),50);
 }
 async function verifyLoginCode(){
- const token=byId("otpCode").value.replace(/\D/g,"").slice(0,6);
- if(token.length!==6){byId("msg").textContent="Enter the 6-digit code from your email.";return;}
+ const token=byId("otpCode").value.replace(/\D/g,"").slice(0,10);
+ if(token.length<6||token.length>10){byId("msg").textContent="Enter the sign-in code from your email.";return;}
  byId("verifyBtn").disabled=true;
  byId("msg").textContent="Verifying code…";
  const result=await sb.auth.verifyOtp({email:pendingLoginEmail,token,type:"email"});
@@ -457,7 +457,7 @@ byId("changeEmailBtn").onclick=function(){
  setTimeout(()=>byId("email").focus(),50);
 };
 byId("email").addEventListener("keydown",function(e){if(e.key==="Enter")requestLoginCode();});
-byId("otpCode").addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,6);});
+byId("otpCode").addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,10);});
 byId("otpCode").addEventListener("keydown",function(e){if(e.key==="Enter")verifyLoginCode();});
 byId("logoutBtn").onclick=async function(){await sb.auth.signOut();location.reload();};
 byId("continueSetupBtn").onclick=function(){setPanel("setup");showSetupStep(nextSetupStep());};
