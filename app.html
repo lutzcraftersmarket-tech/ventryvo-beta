@@ -55,7 +55,7 @@ label{display:block;font-weight:750;margin-bottom:6px}
 .wizard-tabs button{background:#f8fafc;border:1px solid var(--line);color:var(--ink);text-align:left}
 .wizard-tabs button.active{background:#eef4ff;border-color:#9db8ff;color:#1d4ed8}
 .wizard-tabs b{display:block}
-.wizard-tabs small{display:block;color:var(--muted);font-weight:600;margin-top:2px}
+.wizard-tabs small{display:block;color:var(--muted);font-weight:600;margin-top:5px;line-height:1.25}
 .step-panel{display:none}
 .step-panel.active{display:block}
 .list{display:grid;gap:10px}
@@ -73,6 +73,7 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.22);max-width:min(92vw,720px)}
 .placeholder{padding:34px;text-align:center}
 .feature{display:inline-block;background:#eef4ff;border-radius:999px;padding:6px 9px;margin:4px;font-size:12px}
+.vendor-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:14px 0}.vendor-toolbar .field{flex:1;min-width:180px}.status-active{background:#ecfdf3;color:#067647}.status-inactive{background:#f2f4f7;color:#475467}.status-banned{background:#fff1f0;color:#b42318}
 @media(max-width:850px){
  .cards{grid-template-columns:repeat(2,1fr)}
  .grid2,.grid3{grid-template-columns:1fr}
@@ -248,6 +249,6 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
 </main>
 
 <div id="toast" class="toast hidden"></div>
-<script type="module" src="/js/customer-portal.js?v=20261004-otp2"></script>
+<script type="module" src="/js/customer-portal.js?v=20261004-vendors1"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@ const sb=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const byId=id=>document.getElementById(id);
 const state={
  user:null,membership:null,org:null,profile:null,settings:null,progress:null,
- locations:[],events:[],spaceTypes:[],features:[],overrides:[],release:null,
+ locations:[],events:[],spaceTypes:[],vendors:[],features:[],overrides:[],release:null,editingVendorId:null,
  counts:{events:0,vendors:0,applications:0,invoices:0},
  selectedLocationId:null,selectedEventId:null,currentStep:"business"
 };
@@ -129,7 +129,7 @@ async function loadWorkspace(){
   sb.from("locations").select("*").eq("organization_id",orgId).order("created_at"),
   sb.from("events").select("*").eq("organization_id",orgId).is("archived_at",null).order("starts_at"),
   sb.from("event_space_types").select("*").eq("organization_id",orgId).order("sort_order").order("created_at"),
-  sb.from("vendors").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
+  sb.from("vendors").select("*").eq("organization_id",orgId).order("business_name"),
   sb.from("event_applications").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
   sb.from("invoices").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
   sb.from("feature_flags").select("*").order("name"),
@@ -143,7 +143,8 @@ async function loadWorkspace(){
  state.locations=results[3].data||[];
  state.events=results[4].data||[];
  state.spaceTypes=results[5].data||[];
- state.counts={events:state.events.length,vendors:results[6].count||0,applications:results[7].count||0,invoices:results[8].count||0};
+ state.vendors=results[6].data||[];
+ state.counts={events:state.events.length,vendors:state.vendors.length,applications:results[7].count||0,invoices:results[8].count||0};
  state.features=results[9].data||[];
  state.overrides=results[10].data||[];
  state.release=results[11].data||null;
@@ -160,6 +161,7 @@ function renderAll(){
  renderDashboard();
  renderSetup();
  renderEvents();
+ renderVendors();
  renderPlaceholders();
 }
 function renderSetupBanner(){
@@ -263,10 +265,105 @@ function renderEvents(){
   btn.onclick=function(){state.selectedEventId=btn.dataset.eventSpaces;setPanel("setup");renderSetup();showSetupStep("spaces");};
  });
 }
+
+function renderVendors(){
+ const panel=byId("vendorsPanel");if(!panel)return;
+ const q=(panel.dataset.search||"").trim().toLowerCase();
+ const status=panel.dataset.status||"all";
+ const rows=state.vendors.filter(function(v){
+  const hay=[v.business_name,v.contact_name,v.email,v.phone,v.category,v.what_they_sell,v.city,v.state_region].join(" ").toLowerCase();
+  return (!q||hay.includes(q))&&(status==="all"||String(v.status||"active")===status);
+ });
+ let html='<section class="panel"><div class="itemtop"><div><div class="kicker">Vendor database</div><h2>Vendors</h2><p class="muted">Reusable vendor records for applications, bookings, communication, and reporting.</p></div><button id="newVendorBtn" class="primary">Add Vendor</button></div>';
+ html+='<div class="vendor-toolbar"><div class="field"><label>Search vendors</label><input id="vendorSearch" value="'+esc(panel.dataset.search||"")+'" placeholder="Business, contact, email, phone, products…"></div><div class="field" style="max-width:220px"><label>Status</label><select id="vendorStatusFilter"><option value="all">All vendors</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="banned">Banned</option></select></div></div>';
+ html+='<div id="vendorEditor"></div>';
+ if(!rows.length)html+='<div class="empty">'+(state.vendors.length?'No vendors match this filter.':'No vendors yet. Add your first vendor or wait for applications to create vendor records.')+'</div>';
+ else html+='<div class="list">'+rows.map(function(v){
+  const cls=v.status==="banned"?"status-banned":v.status==="inactive"?"status-inactive":"status-active";
+  const place=[v.city,v.state_region].filter(Boolean).join(", ");
+  return '<article class="item"><div class="itemtop"><div><b>'+esc(v.business_name)+'</b><div class="muted">'+esc(v.contact_name||"No contact name")+(v.category?' • '+esc(v.category):'')+'</div></div><span class="chip '+cls+'">'+esc(v.status||"active")+'</span></div>'
+   +(v.what_they_sell?'<p style="margin:9px 0"><b>What they sell:</b> '+esc(v.what_they_sell)+'</p>':'')
+   +'<div class="muted">'+[v.email,v.phone,place].filter(Boolean).map(esc).join(" • ")+'</div>'
+   +(v.notes?'<p class="muted">'+esc(v.notes)+'</p>':'')
+   +(v.status==="banned"&&v.banned_reason?'<div class="notice warn"><b>Banned reason:</b> '+esc(v.banned_reason)+'</div>':'')
+   +'<div class="actions"><button class="secondary" data-edit-vendor="'+esc(v.id)+'">Edit Vendor</button></div></article>';
+ }).join("")+'</div>';
+ html+='</section>';
+ panel.innerHTML=html;
+ const sf=byId("vendorStatusFilter");if(sf)sf.value=status;
+ const search=byId("vendorSearch");if(search)search.oninput=function(){panel.dataset.search=this.value;renderVendors();};
+ if(sf)sf.onchange=function(){panel.dataset.status=this.value;renderVendors();};
+ const add=byId("newVendorBtn");if(add)add.onclick=function(){state.editingVendorId=null;renderVendorEditor();};
+ document.querySelectorAll("[data-edit-vendor]").forEach(function(btn){btn.onclick=function(){state.editingVendorId=btn.dataset.editVendor;renderVendorEditor();};});
+}
+function renderVendorEditor(){
+ const host=byId("vendorEditor");if(!host)return;
+ const v=state.editingVendorId?state.vendors.find(function(x){return x.id===state.editingVendorId;}):null;
+ host.innerHTML='<div class="item selected" style="margin-bottom:14px"><div class="itemtop"><div><b>'+(v?'Edit Vendor':'Add Vendor')+'</b><div class="muted">'+(v?'Update the reusable vendor record.':'Create a vendor record manually.')+'</div></div><button id="cancelVendorEdit" class="secondary">Cancel</button></div>'
+ +'<form id="vendorForm" style="margin-top:14px"><div class="grid2">'
+ +'<div class="field"><label>Business name</label><input id="vendorBusiness" required value="'+esc(v?.business_name||"")+'"></div>'
+ +'<div class="field"><label>Contact name</label><input id="vendorContact" value="'+esc(v?.contact_name||"")+'"></div>'
+ +'<div class="field"><label>Email</label><input id="vendorEmail" type="email" value="'+esc(v?.email||"")+'"></div>'
+ +'<div class="field"><label>Phone</label><input id="vendorPhone" value="'+esc(v?.phone||"")+'"></div>'
+ +'<div class="field"><label>Category</label><input id="vendorCategory" value="'+esc(v?.category||"")+'" placeholder="Example: Candles"></div>'
+ +'<div class="field"><label>Status</label><select id="vendorStatus"><option value="active">Active</option><option value="inactive">Inactive</option><option value="banned">Banned</option></select></div>'
+ +'<div class="field"><label>Website</label><input id="vendorWebsite" type="url" value="'+esc(v?.website||"")+'" placeholder="https://"></div>'
+ +'<div class="field"><label>Facebook</label><input id="vendorFacebook" type="url" value="'+esc(v?.facebook_url||"")+'" placeholder="https://"></div>'
+ +'<div class="field"><label>Instagram</label><input id="vendorInstagram" type="url" value="'+esc(v?.instagram_url||"")+'" placeholder="https://"></div>'
+ +'<div class="field"><label>Street address</label><input id="vendorAddress" value="'+esc(v?.address_line1||"")+'"></div>'
+ +'<div class="field"><label>City</label><input id="vendorCity" value="'+esc(v?.city||"")+'"></div>'
+ +'<div class="field"><label>State / region</label><input id="vendorState" value="'+esc(v?.state_region||"")+'"></div>'
+ +'<div class="field"><label>Postal code</label><input id="vendorPostal" value="'+esc(v?.postal_code||"")+'"></div>'
+ +'</div>'
+ +'<div class="field" style="margin-top:12px"><label>What they sell</label><textarea id="vendorSell" placeholder="Products, services, specialties…">'+esc(v?.what_they_sell||"")+'</textarea></div>'
+ +'<div class="field" style="margin-top:12px"><label>Internal notes</label><textarea id="vendorNotes" placeholder="Organizer-only notes">'+esc(v?.notes||"")+'</textarea></div>'
+ +'<div id="bannedReasonWrap" class="field" style="margin-top:12px"><label>Banned reason</label><textarea id="vendorBannedReason" placeholder="Required when status is banned">'+esc(v?.banned_reason||"")+'</textarea></div>'
+ +'<div class="actions"><button class="primary" type="submit">'+(v?'Save Vendor':'Add Vendor')+'</button></div></form></div>';
+ byId("vendorStatus").value=v?.status||"active";
+ const syncBanned=function(){byId("bannedReasonWrap").classList.toggle("hidden",byId("vendorStatus").value!=="banned");};
+ byId("vendorStatus").onchange=syncBanned;syncBanned();
+ byId("cancelVendorEdit").onclick=function(){state.editingVendorId=null;renderVendors();};
+ byId("vendorForm").onsubmit=function(e){saveVendor(e).catch(formError);};
+ setTimeout(()=>byId("vendorBusiness")?.focus(),50);
+}
+async function saveVendor(event){
+ event.preventDefault();if(!canManage())return toast("You do not have permission to manage vendors.");
+ const business=byId("vendorBusiness").value.trim();if(!business)throw new Error("Business name is required.");
+ const status=byId("vendorStatus").value,bannedReason=byId("vendorBannedReason").value.trim();
+ if(status==="banned"&&!bannedReason)throw new Error("Enter a reason before banning a vendor.");
+ const payload={
+  organization_id:state.org.id,
+  business_name:business,
+  contact_name:byId("vendorContact").value.trim()||null,
+  email:byId("vendorEmail").value.trim().toLowerCase()||null,
+  phone:byId("vendorPhone").value.trim()||null,
+  category:byId("vendorCategory").value.trim()||null,
+  website:byId("vendorWebsite").value.trim()||null,
+  facebook_url:byId("vendorFacebook").value.trim()||null,
+  instagram_url:byId("vendorInstagram").value.trim()||null,
+  address_line1:byId("vendorAddress").value.trim()||null,
+  city:byId("vendorCity").value.trim()||null,
+  state_region:byId("vendorState").value.trim()||null,
+  postal_code:byId("vendorPostal").value.trim()||null,
+  what_they_sell:byId("vendorSell").value.trim()||null,
+  notes:byId("vendorNotes").value.trim()||null,
+  status,
+  banned_reason:status==="banned"?bannedReason:null,
+  updated_at:new Date().toISOString()
+ };
+ let result;
+ if(state.editingVendorId)result=await sb.from("vendors").update(payload).eq("id",state.editingVendorId).eq("organization_id",state.org.id).select().single();
+ else result=await sb.from("vendors").insert(payload).select().single();
+ if(result.error)throw result.error;
+ state.editingVendorId=null;
+ await loadWorkspace();
+ setPanel("vendors");
+ toast("Vendor saved.");
+}
+
 function renderPlaceholders(){
  const core=setupStatus().complete;
  const placeholders={
-  vendors:["Vendor Database","The next build stage will turn this into the reusable vendor CRM: contact details, what they sell, status, notes, media, and booking history."],
   applications:["Applications","Next we will connect public event applications to your configured events and space inventory, with review/approve/wait-list workflows."],
   billing:["Billing & Payments","The payment connection groundwork is in place. Next this becomes invoices, payment deadlines, Stripe/Square/PayPal checkout, receipts, credits, and refunds."],
   staff:["Staff & Permissions","Organization memberships and roles already exist. Next we will add the customer-facing staff invitation and permission controls."],
