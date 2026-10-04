@@ -1,0 +1,5 @@
+/app /app.html 200
+/admin /admin.html 200
+/setup /setup.html 200
+/apply/* /apply.html 200
+/pay/* /pay.html 200

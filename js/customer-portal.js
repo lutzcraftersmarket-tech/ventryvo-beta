@@ -163,6 +163,7 @@ function renderAll(){
  renderEvents();
  renderVendors();
  renderPlaceholders();
+ window.dispatchEvent(new CustomEvent("ventryvo:workspace-rendered"));
 }
 function renderSetupBanner(){
  const s=setupStatus(),banner=byId("setupBanner");
@@ -527,7 +528,7 @@ async function requestLoginCode(){
  pendingLoginEmail=email;
  byId("emailStage").classList.add("hidden");
  byId("codeStage").classList.remove("hidden");
- byId("codeSentTo").textContent="We sent a 6-digit sign-in code to "+email+".";
+ byId("codeSentTo").textContent="We sent a one-time sign-in code to "+email+".";
  byId("msg").textContent="Enter the code from your email.";
  byId("otpCode").value="";
  setTimeout(()=>byId("otpCode").focus(),50);
@@ -565,6 +566,8 @@ byId("locationForm").onsubmit=function(e){saveLocation(e).catch(formError);};
 byId("eventForm").onsubmit=function(e){saveEvent(e).catch(formError);};
 byId("spaceForm").onsubmit=function(e){saveSpace(e).catch(formError);};
 byId("spaceEvent").onchange=function(){state.selectedEventId=byId("spaceEvent").value;renderSpaces();renderFinish();};
+
+window.VENTRYVO_CORE={sb,state,esc,money,toast,formError,canManage,canAdmin,eventDateLabel,loadWorkspace,setPanel};
 
 sb.auth.onAuthStateChange(function(){setTimeout(function(){boot().catch(formError);},0);});
 boot().catch(formError);

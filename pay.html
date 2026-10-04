@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pay Invoice | VENTRYVO</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#d9e0ea;--bg:#f4f7fb;--blue:#2563eb;--navy:#172554}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}.wrap{width:min(700px,calc(100% - 24px));margin:34px auto}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:14px}.brand{font-weight:950;letter-spacing:.13em;color:var(--navy)}.muted{color:var(--muted)}.total{font-size:34px;font-weight:900;color:var(--navy)}button{border:0;border-radius:10px;padding:13px 16px;font:inherit;font-weight:850;background:var(--blue);color:#fff;cursor:pointer;width:100%;margin-top:8px}.notice{padding:13px;border-radius:10px;background:#eef6ff;border:1px solid #bfd6ff;margin-top:12px}.success{background:#ecfdf3;border-color:#abefc6;color:#067647}.error{background:#fff1f0;border-color:#fecaca;color:#b42318}.line{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.hidden{display:none!important}
+</style></head><body>
+<main class="wrap">
+<section class="card"><div class="brand">VENTRYVO SECURE PAYMENT</div><h1 id="orgName">Invoice</h1><p id="vendor" class="muted"></p><div id="message"></div></section>
+<section id="invoice" class="card"><p>Loading invoice…</p></section>
+<section id="providers" class="card hidden"><h2>Choose payment method</h2><div id="providerButtons"></div><p class="muted">Payment is processed by the event organizer’s connected payment provider.</p></section>
+</main>
+<script type="module">
+import {SUPABASE_URL} from "/js/supabase-config.js";
+const $=id=>document.getElementById(id),token=decodeURIComponent(location.pathname.split("/").filter(Boolean)[1]||"");
+async function call(action,extra={}){
+ const r=await fetch(SUPABASE_URL+"/functions/v1/public-invoice-payment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,invoice_token:token,...extra})});
+ const x=await r.json().catch(()=>({}));if(!r.ok||x.error)throw new Error(x.error||"Payment request failed");return x;
+}
+async function verifyReturn(){
+ const u=new URL(location.href),provider=u.searchParams.get("provider"),status=u.searchParams.get("status");if(!provider||!status)return;
+ if(provider==="stripe"&&status==="success"&&u.searchParams.get("session_id"))await call("stripe_verify",{provider_session_id:u.searchParams.get("session_id")});
+ if(provider==="square"&&status==="return")await call("square_verify");
+ if(provider==="paypal"&&status==="return"&&u.searchParams.get("token"))await call("paypal_capture",{order_id:u.searchParams.get("token")});
+ history.replaceState({},document.title,location.pathname);
+}
+async function load(){
+ try{
+  await verifyReturn();const info=await call("info"),inv=info.invoice;
+  $("orgName").textContent=info.organization?.name||"Invoice";$("vendor").textContent=(info.vendor?.business_name||"Vendor")+(info.event?.name?" • "+info.event.name:"");
+  $("invoice").innerHTML='<div class="line"><span>Invoice</span><b>'+String(inv.invoice_number||"")+'</b></div>'
+   +info.items.map(i=>'<div class="line"><span>'+i.description+'</span><b>$'+Number(i.total??Number(i.quantity)*Number(i.unit_price)).toFixed(2)+'</b></div>').join("")
+   +'<div class="line"><span>Total</span><b>$'+Number(inv.total||0).toFixed(2)+'</b></div><div class="line"><span>Balance due</span><span class="total">$'+Number(inv.balance_due||0).toFixed(2)+'</span></div>'
+   +(inv.due_at?'<p class="muted">Due '+new Date(inv.due_at).toLocaleString()+'</p>':'');
+  if(Number(inv.balance_due)<=0||inv.status==="paid"){$("message").innerHTML='<div class="notice success">This invoice is paid. Thank you.</div>';return}
+  if(["cancelled","void"].includes(inv.status)){$("message").innerHTML='<div class="notice error">This invoice has been cancelled and cannot be paid.</div>';return}
+  if(info.providers?.length){
+   $("providers").classList.remove("hidden");
+   $("providerButtons").innerHTML=info.providers.map(p=>'<button data-provider="'+p.provider+'">Pay with '+(p.display_name||p.provider)+'</button>').join("");
+   document.querySelectorAll("[data-provider]").forEach(b=>b.onclick=async()=>{
+    b.disabled=true;b.textContent="Opening secure checkout…";
+    try{const x=await call("start_payment",{provider:b.dataset.provider});location.assign(x.url)}
+    catch(e){$("message").innerHTML='<div class="notice error">'+e.message+'</div>';b.disabled=false;b.textContent="Try Again"}
+   });
+  }else $("message").innerHTML='<div class="notice">Online payment is not enabled yet. Contact the event organizer for payment instructions.</div>';
+ }catch(e){$("invoice").innerHTML='<div class="notice error">'+e.message+'</div>'}
+}
+load();
+</script></body></html>

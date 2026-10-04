@@ -73,7 +73,7 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.22);max-width:min(92vw,720px)}
 .placeholder{padding:34px;text-align:center}
 .feature{display:inline-block;background:#eef4ff;border-radius:999px;padding:6px 9px;margin:4px;font-size:12px}
-.vendor-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:14px 0}.vendor-toolbar .field{flex:1;min-width:180px}.status-active{background:#ecfdf3;color:#067647}.status-inactive{background:#f2f4f7;color:#475467}.status-banned{background:#fff1f0;color:#b42318}
+.vendor-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:14px 0}.vendor-toolbar .field{flex:1;min-width:180px}.status-active{background:#ecfdf3;color:#067647}.status-inactive{background:#f2f4f7;color:#475467}.status-banned{background:#fff1f0;color:#b42318}\n.status-pending,.status-draft,.status-reserved{background:#fffaeb;color:#854d0e}.status-approved,.status-paid,.status-confirmed,.status-connected,.status-published{background:#ecfdf3;color:#067647}.status-waitlist,.status-partial,.status-trialing{background:#eef4ff;color:#274690}.status-declined,.status-cancelled,.status-failed,.status-suspended,.status-past_due{background:#fff1f0;color:#b42318}.metric-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.mini-metric{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff}.mini-metric b{font-size:22px;display:block;color:var(--navy)}.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}.provider-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.provider-card{border:1px solid var(--line);border-radius:13px;padding:14px;background:#fff}.linkbox{display:flex;gap:8px;align-items:center}.linkbox input{font-size:13px}.subnav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.subnav button{padding:8px 11px}@media(max-width:850px){.metric-row,.provider-grid,.split{grid-template-columns:1fr 1fr}}@media(max-width:520px){.metric-row,.provider-grid,.split{grid-template-columns:1fr}}
 @media(max-width:850px){
  .cards{grid-template-columns:repeat(2,1fr)}
  .grid2,.grid3{grid-template-columns:1fr}
@@ -143,9 +143,12 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
   <button data-nav="events">Events</button>
   <button data-nav="vendors">Vendors</button>
   <button data-nav="applications">Applications</button>
+  <button data-nav="bookings">Bookings</button>
   <button data-nav="billing">Billing</button>
+  <button data-nav="checkin">Check-In</button>
   <button data-nav="staff">Staff</button>
   <button data-nav="reports">Reports</button>
+  <button data-nav="settings">Settings</button>
  </nav>
 
  <section id="dashboardPanel" data-panel="dashboard"></section>
@@ -243,12 +246,15 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
  <section id="eventsPanel" data-panel="events" class="hidden"></section>
  <section id="vendorsPanel" data-panel="vendors" class="hidden"></section>
  <section id="applicationsPanel" data-panel="applications" class="hidden"></section>
+ <section id="bookingsPanel" data-panel="bookings" class="hidden"></section>
  <section id="billingPanel" data-panel="billing" class="hidden"></section>
+ <section id="checkinPanel" data-panel="checkin" class="hidden"></section>
  <section id="staffPanel" data-panel="staff" class="hidden"></section>
  <section id="reportsPanel" data-panel="reports" class="hidden"></section>
+ <section id="settingsPanel" data-panel="settings" class="hidden"></section>
 </main>
 
 <div id="toast" class="toast hidden"></div>
-<script type="module" src="/js/customer-portal.js?v=20261004-vendors1"></script>
+<script type="module" src="/js/customer-portal.js?v=20261004-big1"></script>\n<script type="module" src="/js/operations.js?v=20261004-big1"></script>
 </body>
 </html>

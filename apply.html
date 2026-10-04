@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vendor Application | VENTRYVO</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#d9e0ea;--bg:#f4f7fb;--blue:#2563eb;--navy:#172554}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{width:min(820px,calc(100% - 24px));margin:24px auto 60px}.hero,.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:14px}
+.brand{font-weight:950;letter-spacing:.13em;color:var(--navy)}h1,h2{color:var(--navy)}.muted{color:var(--muted);line-height:1.5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{margin-top:12px}
+label{display:block;font-weight:750;margin-bottom:6px}input,select,textarea{width:100%;padding:12px;border:1px solid #cfd7e3;border-radius:10px;font:inherit}textarea{min-height:110px}
+button{border:0;border-radius:10px;padding:13px 18px;font:inherit;font-weight:850;background:var(--blue);color:#fff;cursor:pointer}.notice{padding:13px;border-radius:10px;background:#eef6ff;border:1px solid #bfd6ff;margin-top:12px}.success{background:#ecfdf3;border-color:#abefc6;color:#067647}.error{background:#fff1f0;border-color:#fecaca;color:#b42318}.hidden{display:none!important}.choice{display:flex;gap:8px;align-items:flex-start;margin-top:10px}.choice input{width:auto;margin-top:3px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.hero,.card{padding:18px}}
+</style></head><body>
+<main class="wrap">
+<section class="hero"><div class="brand">VENTRYVO</div><h1 id="eventName">Vendor Application</h1><p id="eventInfo" class="muted">Loading application…</p></section>
+<section id="loading" class="card">Loading…</section>
+<section id="formCard" class="card hidden"><h2 id="formTitle">Vendor Application</h2><p id="intro" class="muted"></p>
+<form id="form">
+<div class="grid">
+<div class="field"><label>Business name</label><input name="business" required></div><div class="field"><label>Contact name</label><input name="contact" required></div>
+<div class="field"><label>Email</label><input name="email" type="email" required></div><div class="field"><label>Phone</label><input name="phone" required></div>
+<div class="field"><label>Website</label><input name="website" type="url"></div><div class="field"><label>Facebook</label><input name="facebook" type="url"></div>
+<div class="field"><label>Instagram</label><input name="instagram" type="url"></div><div class="field"><label>Vendor category</label><select id="category" name="category" required></select></div>
+<div class="field"><label>Space type</label><select id="space" name="space" required></select></div>
+</div>
+<div class="field"><label>What do you sell?</label><textarea name="what" required></textarea></div>
+<div id="photosWrap" class="field"><label>Product / booth photos</label><input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple><small id="photoHelp" class="muted"></small></div>
+<label id="termsChoice" class="choice"><input id="terms" type="checkbox"><span id="termsText">I agree to the vendor terms.</span></label>
+<label id="paymentChoice" class="choice hidden"><input id="paymentReady" type="checkbox"><span id="paymentText"></span></label>
+<div id="error" class="notice error hidden"></div><button id="submitBtn" type="submit" style="margin-top:16px">Submit Application</button>
+</form></section><section id="done" class="card hidden"></section>
+</main>
+<script type="module">
+import {SUPABASE_URL} from "/js/supabase-config.js";
+const $=id=>document.getElementById(id);
+const parts=location.pathname.split("/").filter(Boolean),org=decodeURIComponent(parts[1]||""),eventSlug=decodeURIComponent(parts[2]||"");
+let cfg=null;
+async function call(action,body={}){
+ const r=await fetch(SUPABASE_URL+"/functions/v1/public-vendor-application",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,organization_slug:org,event_slug:eventSlug,...body})});
+ const x=await r.json().catch(()=>({}));if(!r.ok||x.error)throw new Error(x.error||"Request failed");return x;
+}
+async function load(){
+ try{
+  cfg=await call("config");$("eventName").textContent=cfg.event.name;
+  $("eventInfo").textContent=new Date(cfg.event.starts_at).toLocaleString()+" • "+(cfg.event.venue_name||cfg.event.address||"");
+  $("formTitle").textContent=cfg.settings.application_title||"Vendor Application";$("intro").textContent=cfg.settings.intro_text||cfg.event.public_description||"";
+  $("space").innerHTML='<option value="">Choose a space</option>'+cfg.spaces.map(s=>'<option value="'+s.id+'">'+s.name+' — $'+Number(s.price||0).toFixed(2)+(s.remaining<=0?' — Wait list':' — '+s.remaining+' left')+'</option>').join("");
+  $("category").innerHTML='<option value="">Choose a category</option>'+cfg.categories.map(c=>'<option value="'+c.id+'">'+c.name+(c.remaining===0?' — Wait list':c.max_vendors!=null?' — '+c.remaining+' left':'')+(Number(c.fee||0)?' + $'+Number(c.fee).toFixed(2):'')+'</option>').join("");
+  $("photosWrap").classList.toggle("hidden",!cfg.settings.require_photos);$("photoHelp").textContent=cfg.settings.require_photos?"At least "+Number(cfg.settings.minimum_photos||1)+" photo(s) required.":"";
+  $("termsChoice").classList.toggle("hidden",!cfg.settings.require_terms_acknowledgement);$("termsText").textContent=cfg.settings.terms_text||"I agree to the vendor terms and event rules.";
+  $("paymentChoice").classList.toggle("hidden",!cfg.settings.require_payment_readiness_acknowledgement);$("paymentText").textContent=cfg.settings.payment_readiness_text||"If approved, I am prepared to pay the invoice promptly.";
+  $("loading").classList.add("hidden");$("formCard").classList.remove("hidden");
+ }catch(e){$("loading").innerHTML='<div class="notice error">'+e.message+'</div>'}
+}
+async function upload(file,token){
+ const fd=new FormData();fd.append("organization_slug",org);fd.append("event_slug",eventSlug);fd.append("draft_token",token);fd.append("file",file);
+ const r=await fetch(SUPABASE_URL+"/functions/v1/public-vendor-media",{method:"POST",body:fd});const x=await r.json().catch(()=>({}));
+ if(!r.ok||x.error)throw new Error(x.error||"Photo upload failed");return x.path;
+}
+$("form").onsubmit=async e=>{
+ e.preventDefault();$("error").classList.add("hidden");const f=new FormData(e.currentTarget);
+ if(cfg.settings.require_terms_acknowledgement&&!$("terms").checked){$("error").textContent="Please acknowledge the vendor terms.";$("error").classList.remove("hidden");return}
+ if(cfg.settings.require_payment_readiness_acknowledgement&&!$("paymentReady").checked){$("error").textContent="Please acknowledge the payment-readiness statement.";$("error").classList.remove("hidden");return}
+ const files=[...$("photos").files];if(cfg.settings.require_photos&&files.length<Number(cfg.settings.minimum_photos||1)){$("error").textContent="Please upload the required photos.";$("error").classList.remove("hidden");return}
+ const btn=$("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
+ try{
+  const draft=await call("start_draft",{email:f.get("email"),business_name:f.get("business"),contact_name:f.get("contact"),phone:f.get("phone")});
+  const media=[];for(const file of files)media.push(await upload(file,draft.recovery_token));
+  const x=await call("submit",{recovery_token:draft.recovery_token,business_name:f.get("business"),contact_name:f.get("contact"),email:f.get("email"),phone:f.get("phone"),website:f.get("website"),facebook_url:f.get("facebook"),instagram_url:f.get("instagram"),what_they_sell:f.get("what"),space_type_id:f.get("space"),event_category_id:f.get("category"),media_paths:media,terms_acknowledged:$("terms").checked,payment_readiness_acknowledged:$("paymentReady").checked});
+  $("formCard").classList.add("hidden");$("done").classList.remove("hidden");$("done").innerHTML='<h2>Application received</h2><div class="notice success">'+(x.status==="waitlist"?"Your application was received and is currently on the wait list.":"Your application was submitted for review.")+'</div><p class="muted">Keep an eye on your email for the next update.</p>';
+ }catch(err){$("error").textContent=err.message;$("error").classList.remove("hidden");btn.disabled=false;btn.textContent="Submit Application"}
+};
+load();
+</script></body></html>

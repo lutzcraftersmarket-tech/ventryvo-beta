@@ -1,196 +1,106 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>VENTRYVO Master Admin</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>VENTRYVO Platform Admin</title>
 <style>
 :root{--ink:#172033;--muted:#667085;--line:#d9e0ea;--bg:#f4f7fb;--blue:#2563eb;--navy:#172554;--green:#0f766e}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
-.shell{width:min(1240px,calc(100% - 28px));margin:26px auto 60px}.hidden{display:none!important}
-header{background:linear-gradient(135deg,var(--navy),#1e3a8a 58%,var(--green));color:#fff;padding:22px 24px;border-radius:20px;display:flex;justify-content:space-between;gap:20px;align-items:center}
-.brand{font-weight:900;letter-spacing:.13em}.muted{color:var(--muted)}button,.btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
-.primary{background:var(--blue);color:#fff}.light{background:#fff;color:var(--ink);border:1px solid var(--line)}
-.panel,.login{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:16px}.login{width:min(500px,calc(100% - 28px));margin:70px auto}
-input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cfd7e3;border-radius:9px;font:inherit}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
-.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}.stat strong{display:block;font-size:27px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tabs button.active{background:var(--blue);color:#fff}
-.toolbar{display:grid;grid-template-columns:1fr 180px auto auto;gap:10px;margin-bottom:12px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;margin:10px 0;padding:16px}
-.cardtop{display:flex;justify-content:space-between;gap:12px}.name{font-weight:850;font-size:19px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.chip{background:#eef4ff;border-radius:999px;padding:5px 8px;font-size:12px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:13px}.notes textarea{min-height:80px}.right{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}.empty{text-align:center;padding:35px;color:var(--muted)}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12px;text-transform:uppercase;color:var(--muted)}
-@media(max-width:850px){.stats{grid-template-columns:repeat(2,1fr)}.toolbar,.grid,.cols{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
-@media print{header,.tabs,.toolbar,.right,.no-print{display:none!important}.shell{width:100%;margin:0}.card{break-inside:avoid}}
-</style>
-</head>
-<body>
-<section id="login" class="login">
-<div class="brand" style="color:#1d4ed8">VENTRYVO</div><h1>Master Admin</h1>
-<p class="muted">Owner access only.</p>
-<label>Email</label><input id="email" type="email" value="lutzcraftersmarket@gmail.com">
-<label>Password</label><input id="password" type="password" style="margin-top:8px">
-<div style="display:flex;gap:8px;margin-top:12px"><button id="loginBtn" class="primary">Sign In</button><button id="signupBtn" class="light">Create Owner Login</button></div>
-<p id="authMsg" class="muted"></p>
-</section>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}.hidden{display:none!important}
+.login{width:min(500px,calc(100% - 24px));margin:70px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}.shell{width:min(1260px,calc(100% - 24px));margin:24px auto 60px}
+.brand{font-weight:950;letter-spacing:.13em}header{background:linear-gradient(135deg,var(--navy),#1e3a8a 58%,var(--green));color:#fff;border-radius:20px;padding:22px;display:flex;justify-content:space-between;gap:14px;align-items:center}
+.muted{color:var(--muted)}button,.btn{border:0;border-radius:10px;padding:10px 13px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.primary{background:var(--blue);color:#fff}.light,.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}.danger{background:#fff1f0;color:#b42318;border:1px solid #fecaca}
+input,select,textarea{width:100%;padding:11px;border:1px solid #cfd7e3;border-radius:9px;font:inherit}.panel,.card,.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}.panel{margin-top:14px}.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:14px 0}.stat strong{display:block;font-size:26px;color:var(--navy)}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.tabs button.active{background:var(--blue);color:#fff}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.list{display:grid;gap:10px}.cardtop{display:flex;justify-content:space-between;gap:10px}.chip{display:inline-block;border-radius:999px;padding:5px 8px;font-size:12px;font-weight:800;background:#eef4ff;margin:2px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.empty{text-align:center;padding:28px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12px;text-transform:uppercase;color:var(--muted)}.table-wrap{overflow:auto}.notice{padding:12px;border:1px solid #bfd6ff;background:#eef6ff;border-radius:10px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}.grid3{grid-template-columns:1fr 1fr}}@media(max-width:600px){.stats,.grid2,.grid3{grid-template-columns:1fr 1fr}header{align-items:flex-start;flex-direction:column}}@media(max-width:430px){.stats,.grid2,.grid3{grid-template-columns:1fr}}
+</style></head><body>
+<section id="login" class="login"><div class="brand" style="color:#1d4ed8">VENTRYVO</div><h1>Platform Admin</h1><p class="muted">Owner access only. We’ll email a one-time sign-in code.</p>
+<div id="emailStage"><input id="email" type="email" value="lutzcraftersmarket@gmail.com"><button id="sendCode" class="primary" style="width:100%;margin-top:10px">Email Sign-In Code</button></div>
+<div id="codeStage" class="hidden"><input id="code" inputmode="numeric" maxlength="10" placeholder="Sign-in code" style="font-size:22px;text-align:center;letter-spacing:.14em"><button id="verifyCode" class="primary" style="width:100%;margin-top:10px">Verify & Sign In</button><button id="changeEmail" class="light" style="width:100%;margin-top:7px">Change Email</button></div><p id="authMsg" class="muted"></p></section>
 
 <main id="app" class="shell hidden">
-<header><div><div class="brand">VENTRYVO MASTER ADMIN</div><div style="opacity:.8;margin-top:4px">Platform accounts, memberships, beta applications & releases</div></div>
-<div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn light" href="/" target="_blank">Application</a><a class="btn light" href="/app" target="_blank">Customer Portal</a><button id="logoutBtn" class="light">Sign Out</button></div></header>
+<header><div><div class="brand">VENTRYVO PLATFORM ADMIN</div><div style="opacity:.82;margin-top:4px">Signup approvals, customers, plans, subscription billing, and releases</div></div><div class="actions"><a class="btn light" href="/app" target="_blank">Customer Portal</a><button id="logout" class="light">Sign Out</button></div></header>
+<section class="stats"><div class="stat"><strong id="sApps">0</strong>Applications</div><div class="stat"><strong id="sNew">0</strong>New</div><div class="stat"><strong id="sOrgs">0</strong>Organizations</div><div class="stat"><strong id="sActive">0</strong>Active/Trial</div><div class="stat"><strong id="sMRR">$0</strong>Est. MRR</div><div class="stat"><strong id="sPastDue">0</strong>Past Due</div></section>
+<div class="tabs"><button data-tab="applications" class="active">Signup Applications</button><button data-tab="accounts">Customer Accounts</button><button data-tab="billing">Plans & Billing</button><button data-tab="releases">Releases</button></div>
 
-<section class="stats">
-<div class="stat"><strong id="sApps">0</strong><span>Beta Applications</span></div>
-<div class="stat"><strong id="sNew">0</strong><span>New</span></div>
-<div class="stat"><strong id="sOrgs">0</strong><span>Organizations</span></div>
-<div class="stat"><strong id="sActive">0</strong><span>Active Accounts</span></div>
-<div class="stat"><strong id="sReleases">0</strong><span>Releases</span></div>
-</section>
-
-<div class="tabs no-print">
-<button data-tab="applications" class="active">Beta Applications</button>
-<button data-tab="accounts">Customer Accounts</button>
-<button data-tab="releases">Releases & Features</button>
-</div>
-
-<section id="applicationsTab">
-<div class="toolbar no-print"><input id="search" placeholder="Search applications…"><select id="statusFilter"><option value="all">All statuses</option><option>new</option><option>reviewing</option><option>selected</option><option>waitlist</option><option>declined</option></select><button id="csvBtn" class="light">Export Excel</button><button id="pdfBtn" class="primary">Print / PDF</button></div>
-<div id="applications"></div>
-</section>
+<section id="applicationsTab"><div class="panel"><div class="grid3"><input id="search" placeholder="Search applications"><select id="statusFilter"><option value="all">All statuses</option><option>new</option><option>reviewing</option><option>selected</option><option>waitlist</option><option>declined</option></select><button id="csvBtn" class="light">Export CSV</button></div></div><div id="applications" class="list" style="margin-top:12px"></div></section>
 
 <section id="accountsTab" class="hidden">
-<div class="panel no-print">
-<h2>Create Customer Organization</h2><div class="grid"><input id="orgName" placeholder="Organization name"><input id="orgSlug" placeholder="URL slug, e.g. trinity-crafters"></div>
-<div class="right"><button id="createOrgBtn" class="primary">Create Organization</button></div>
-</div>
-<div class="panel no-print">
-<h2>Invite / Add Member</h2>
-<div class="grid">
-  <select id="inviteOrg"><option value="">Select organization</option></select>
-  <input id="inviteName" placeholder="Customer name">
-  <input id="inviteEmail" type="email" placeholder="Customer email">
-  <select id="inviteRole">
-    <option value="owner">Owner</option>
-    <option value="admin">Admin</option>
-    <option value="manager">Manager</option>
-    <option value="staff">Staff</option>
-    <option value="read_only">Read only</option>
-  </select>
-</div>
-<div class="right"><button id="inviteBtn" class="primary">Invite Customer</button></div>
-<p id="inviteMsg" class="muted"></p>
-</div>
+<div class="panel"><h2>Create Customer Organization</h2><div class="grid3"><input id="orgName" placeholder="Organization name"><input id="orgSlug" placeholder="URL slug"><select id="orgPlan"></select></div><div class="actions"><button id="createOrgBtn" class="primary">Create Organization</button></div></div>
+<div class="panel"><h2>Invite / Add Member</h2><div class="grid3"><select id="inviteOrg"></select><input id="inviteName" placeholder="Customer name"><input id="inviteEmail" type="email" placeholder="Customer email"><select id="inviteRole"><option value="owner">Owner</option><option value="admin">Admin</option><option value="manager">Manager</option><option value="staff">Staff</option><option value="read_only">Read only</option></select></div><div class="actions"><button id="inviteBtn" class="primary">Process Invitation</button></div><p id="inviteMsg" class="muted"></p></div>
 <div class="panel"><h2>Customer Accounts</h2><div id="orgs"></div></div>
 </section>
 
-<section id="releasesTab" class="hidden">
-<div class="panel"><h2>Release Control</h2><p class="muted">All customers run the same VENTRYVO codebase. Deploying the main branch pushes fixes platform-wide. Feature flags let you stage features before general release.</p><div id="features"></div></div>
-<div class="panel no-print"><h2>Record a Release</h2><div class="grid"><input id="releaseVersion" placeholder="Version, e.g. 1.0.1"><input id="releaseTitle" placeholder="Release title"></div><textarea id="releaseNotes" placeholder="What changed?" style="margin-top:10px"></textarea><div class="right"><button id="releaseBtn" class="primary">Record Release</button></div></div>
-<div class="panel"><h2>Release History</h2><div id="releases"></div></div>
+<section id="billingTab" class="hidden">
+<div class="panel"><h2>VENTRYVO Plans</h2><p class="muted">These are software-subscription plans. Vendor payment processing is separate.</p>
+<form id="planForm"><div class="grid3"><input name="name" placeholder="Plan name" required><input name="code" placeholder="Code" required><input name="price" type="number" min="0" step=".01" placeholder="Price"><select name="interval"><option value="month">month</option><option value="year">year</option></select><input name="trial" type="number" min="0" value="0" placeholder="Trial days"><input name="stripe" placeholder="Stripe Price ID"><label><input name="visible" type="checkbox" style="width:auto"> Self-service visible</label></div><div class="actions"><button class="primary">Add Plan</button></div></form><div id="plans" style="margin-top:12px"></div></div>
+<div class="panel"><h2>Subscription Billing Events</h2><div id="billingEvents"></div></div>
 </section>
+
+<section id="releasesTab" class="hidden"><div class="panel"><h2>Record Release</h2><div class="grid2"><input id="releaseVersion" placeholder="Version"><input id="releaseTitle" placeholder="Title"></div><textarea id="releaseNotes" placeholder="Release notes" style="margin-top:8px"></textarea><div class="actions"><button id="releaseBtn" class="primary">Record Release</button></div></div><div class="panel"><h2>Release History</h2><div id="releases"></div></div></section>
 </main>
 
 <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, APPLICATION_URL } from "/js/supabase-config.js";
-const sb=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-let apps=[],orgs=[],features=[],releases=[];
-const $=id=>document.getElementById(id);
+import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "/js/supabase-config.js";
+const sb=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY),$=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const chips=a=>(a||[]).map(x=>'<span class="chip">'+esc(x)+'</span>').join("");
-function msg(t){$("authMsg").textContent=t}
-async function verifyAdmin(){
- const {data:{user}}=await sb.auth.getUser(); if(!user)return false;
- const {data,error}=await sb.from("platform_admins").select("user_id").eq("user_id",user.id).maybeSingle();
- return !error&&!!data;
-}
-async function boot(){
- if(!(await verifyAdmin())){await sb.auth.signOut();$("login").classList.remove("hidden");$("app").classList.add("hidden");msg("This account is not authorized for master admin.");return}
- $("login").classList.add("hidden");$("app").classList.remove("hidden");await loadAll();
-}
+let pending="",apps=[],orgs=[],plans=[],subs=[],profiles=[],releases=[],billingEvents=[];
+
+async function edge(name,body){const {data,error}=await sb.functions.invoke(name,{body});if(error)throw error;if(data?.error)throw new Error(data.error);return data}
+async function verifyAdmin(){const {data:{user}}=await sb.auth.getUser();if(!user)return false;const {data}=await sb.from("platform_admins").select("user_id").eq("user_id",user.id).maybeSingle();return !!data}
+async function boot(){if(!(await verifyAdmin())){$("login").classList.remove("hidden");$("app").classList.add("hidden");return}$("login").classList.add("hidden");$("app").classList.remove("hidden");await loadAll()}
 async function loadAll(){
- const [a,o,f,r]=await Promise.all([
+ const r=await Promise.all([
   sb.from("beta_test_applications").select("*").order("created_at",{ascending:false}),
   sb.from("organizations").select("*").order("created_at",{ascending:false}),
-  sb.from("feature_flags").select("*").order("name"),
-  sb.from("platform_releases").select("*").order("created_at",{ascending:false})
+  sb.from("plans").select("*").order("sort_order"),
+  sb.from("subscriptions").select("*"),
+  sb.from("organization_profile").select("*"),
+  sb.from("platform_releases").select("*").order("created_at",{ascending:false}),
+  sb.from("platform_billing_events").select("*").order("created_at",{ascending:false}).limit(100)
  ]);
- if(a.error)throw a.error;if(o.error)throw o.error;if(f.error)throw f.error;if(r.error)throw r.error;
- apps=a.data||[];orgs=o.data||[];features=f.data||[];releases=r.data||[];render();
+ for(const x of r)if(x.error)throw x.error;[apps,orgs,plans,subs,profiles,releases,billingEvents]=r.map(x=>x.data||[]);render();
 }
+function money(n){return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(n||0))}
 function render(){
- $("sApps").textContent=apps.length;$("sNew").textContent=apps.filter(x=>x.status==="new").length;$("sOrgs").textContent=orgs.length;$("sActive").textContent=orgs.filter(x=>x.status==="active"||x.status==="trial").length;$("sReleases").textContent=releases.length;
- renderApps();renderOrgs();renderFeatures();renderReleases();
+ $("sApps").textContent=apps.length;$("sNew").textContent=apps.filter(x=>x.status==="new").length;$("sOrgs").textContent=orgs.length;$("sActive").textContent=orgs.filter(x=>["active","trial"].includes(x.status)).length;$("sPastDue").textContent=subs.filter(x=>["past_due","unpaid"].includes(x.status)).length;
+ $("sMRR").textContent=money(subs.filter(s=>["active","trialing"].includes(s.status)).reduce((n,s)=>{const p=plans.find(x=>x.id===s.plan_id);return n+(p?.billing_interval==="year"?Number(p.price_cents||0)/1200:Number(p?.price_cents||0)/100)},0));
+ renderApps();renderOrgs();renderPlans();renderBillingEvents();renderReleases();
 }
 function renderApps(){
  const q=$("search").value.toLowerCase(),status=$("statusFilter").value;
  const list=apps.filter(x=>(status==="all"||x.status===status)&&[x.name,x.email,x.organization,x.city_state].join(" ").toLowerCase().includes(q));
- $("applications").innerHTML=list.length?list.map(x=>`<article class="card">
- <div class="cardtop"><div><div class="name">${esc(x.name)}</div><div class="muted">${esc(x.organization)} • ${esc(x.email)} • ${esc(x.city_state)}</div><small class="muted">${new Date(x.created_at).toLocaleString()}</small></div>
- <select class="status" data-id="${x.id}"><option ${x.status==="new"?"selected":""}>new</option><option ${x.status==="reviewing"?"selected":""}>reviewing</option><option ${x.status==="selected"?"selected":""}>selected</option><option ${x.status==="waitlist"?"selected":""}>waitlist</option><option ${x.status==="declined"?"selected":""}>declined</option></select></div>
- <div class="cols"><div><b>Event types</b><div class="chips">${chips(x.event_types)}</div><p><b>Events/year:</b> ${esc(x.events_per_year)}<br><b>Typical vendors:</b> ${esc(x.vendors_per_event)}<br><b>Real event:</b> ${esc(x.use_real_event)}<br><b>Feedback:</b> ${esc(x.report_bugs_feedback)}</p></div>
- <div><b>Interested in</b><div class="chips">${chips(x.features_interested)}</div><p><b>Current tools:</b> ${esc((x.current_management||[]).join(", "))}</p></div></div>
- <div><p><b>Biggest headache:</b> ${esc(x.biggest_headache)}</p>${x.indispensable_feature?'<p><b>Indispensable feature:</b> '+esc(x.indispensable_feature)+'</p>':""}${x.anything_else?'<p><b>Anything else:</b> '+esc(x.anything_else)+'</p>':""}</div>
- <div class="notes"><textarea data-note="${x.id}" placeholder="Private admin notes">${esc(x.admin_notes||"")}</textarea><div class="right no-print">${x.status==="selected"&&x.selected_organization_id?'<span class="muted" style="align-self:center">Beta account created</span>':'<button class="approveBeta primary" data-id="'+x.id+'">Approve & Send Setup Link</button>'}<button class="saveNote light" data-id="${x.id}">Save Notes</button></div></div>
- </article>`).join(""):'<div class="empty">No applications match.</div>';
- document.querySelectorAll(".status").forEach(el=>el.onchange=async()=>{await sb.from("beta_test_applications").update({status:el.value,reviewed_at:new Date().toISOString()}).eq("id",el.dataset.id);await loadAll()});
- document.querySelectorAll(".saveNote").forEach(el=>el.onclick=async()=>{const ta=document.querySelector('[data-note="'+el.dataset.id+'"]');await sb.from("beta_test_applications").update({admin_notes:ta.value}).eq("id",el.dataset.id);el.textContent="Saved";setTimeout(()=>el.textContent="Save Notes",900)});
- document.querySelectorAll(".approveBeta").forEach(el=>el.onclick=async()=>{
-   const app=apps.find(x=>x.id===el.dataset.id);
-   if(!app)return;
-   if(!confirm("Approve "+app.name+" for the VENTRYVO beta and send the account setup invitation to "+app.email+"?"))return;
-   const original=el.textContent;
-   el.disabled=true;el.textContent="Creating account & sending…";
-   const {data:{session}}=await sb.auth.getSession();
-   if(!session){alert("Your admin session expired. Sign in again.");location.reload();return}
-   const response=await fetch("https://hzxiljqrqmtzsksxsdyj.supabase.co/functions/v1/master-admin-api",{
-     method:"POST",
-     headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
-     body:JSON.stringify({action:"approve_beta_tester",application_id:el.dataset.id})
-   });
-   const result=await response.json().catch(()=>({}));
-   if(!response.ok||result.error){
-     el.disabled=false;el.textContent=original;
-     alert(result.error||"Unable to create the beta account.");
-     return;
-   }
-   alert(result.invited
-     ?"Approved. VENTRYVO created the organization and sent the setup invitation to "+result.email+"."
-     :"Approved. The user already had a VENTRYVO login, so the organization was linked to their account.");
-   await loadAll();
- });
+ $("applications").innerHTML=list.length?list.map(x=>'<article class="card"><div class="cardtop"><div><b style="font-size:18px">'+esc(x.name)+'</b><div class="muted">'+esc(x.organization)+' • '+esc(x.email)+' • '+esc(x.city_state)+'</div></div><select data-app-status="'+x.id+'" style="max-width:150px"><option>new</option><option>reviewing</option><option>selected</option><option>waitlist</option><option>declined</option></select></div><p><b>Events/year:</b> '+esc(x.events_per_year)+' • <b>Vendors:</b> '+esc(x.vendors_per_event)+'</p><p><b>Biggest headache:</b> '+esc(x.biggest_headache||"")+'</p><textarea data-note="'+x.id+'" placeholder="Private admin notes">'+esc(x.admin_notes||"")+'</textarea><div class="actions">'+(x.status==="selected"&&x.selected_organization_id?'<span class="chip">Account created</span>':'<button class="primary" data-approve="'+x.id+'">Approve & Create Account</button>')+'<button class="secondary" data-save-note="'+x.id+'">Save Notes</button></div></article>').join(""):'<div class="empty">No applications match.</div>';
+ document.querySelectorAll("[data-app-status]").forEach(s=>{const a=apps.find(x=>x.id===s.dataset.appStatus);s.value=a?.status||"new";s.onchange=async()=>{await sb.from("beta_test_applications").update({status:s.value,reviewed_at:new Date().toISOString()}).eq("id",s.dataset.appStatus);await loadAll()}});
+ document.querySelectorAll("[data-save-note]").forEach(b=>b.onclick=async()=>{const ta=document.querySelector('[data-note="'+b.dataset.saveNote+'"]');await sb.from("beta_test_applications").update({admin_notes:ta.value}).eq("id",b.dataset.saveNote);b.textContent="Saved"});
+ document.querySelectorAll("[data-approve]").forEach(b=>b.onclick=async()=>{const a=apps.find(x=>x.id===b.dataset.approve);if(!confirm("Approve "+a.name+" and create their VENTRYVO workspace?"))return;b.disabled=true;b.textContent="Creating…";try{const x=await edge("master-admin-api",{action:"approve_beta_tester",application_id:a.id});alert(x.invited?"Approved and invitation sent.":"Approved and linked to existing login.");await loadAll()}catch(e){alert(e.message);b.disabled=false;b.textContent="Approve & Create Account"}});
 }
 function renderOrgs(){
  $("inviteOrg").innerHTML='<option value="">Select organization</option>'+orgs.map(o=>'<option value="'+o.id+'">'+esc(o.name)+'</option>').join("");
- $("orgs").innerHTML=orgs.length?'<table><thead><tr><th>Organization</th><th>Status</th><th>Created</th></tr></thead><tbody>'+orgs.map(o=>`<tr><td><b>${esc(o.name)}</b><br><small>${esc(o.slug)}</small></td><td><select class="orgStatus" data-id="${o.id}"><option ${o.status==="active"?"selected":""}>active</option><option ${o.status==="trial"?"selected":""}>trial</option><option ${o.status==="suspended"?"selected":""}>suspended</option><option ${o.status==="closed"?"selected":""}>closed</option></select></td><td>${new Date(o.created_at).toLocaleDateString()}</td></tr>`).join("")+'</tbody></table>':'<div class="empty">No customer organizations yet.</div>';
- document.querySelectorAll(".orgStatus").forEach(el=>el.onchange=async()=>{await sb.from("organizations").update({status:el.value}).eq("id",el.dataset.id);await loadAll()});
+ $("orgPlan").innerHTML='<option value="">No plan yet</option>'+plans.filter(p=>p.active).map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+ $("orgs").innerHTML=orgs.length?'<div class="table-wrap"><table><thead><tr><th>Organization</th><th>Contact</th><th>Account</th><th>Plan</th><th>Subscription</th><th>Trial / Period end</th><th>Actions</th></tr></thead><tbody>'
+ +orgs.map(o=>{const p=profiles.find(x=>x.organization_id===o.id),s=subs.find(x=>x.organization_id===o.id);return '<tr><td><b>'+esc(o.name)+'</b><br><small>'+esc(o.slug)+'</small></td><td>'+esc(p?.contact_name||"")+'<br><small>'+esc(p?.contact_email||"")+'</small></td><td><select data-org-status="'+o.id+'"><option>trial</option><option>active</option><option>suspended</option><option>closed</option></select></td><td><select data-org-plan="'+o.id+'"><option value="">No plan</option>'+plans.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join("")+'</select></td><td>'+esc(s?.status||"none")+(s?.provider?'<br><small>'+esc(s.provider)+'</small>':'')+'</td><td>'+esc(s?.trial_end?new Date(s.trial_end).toLocaleDateString():s?.current_period_end?new Date(s.current_period_end).toLocaleDateString():"")+'</td><td><button class="secondary" data-trial="'+o.id+'">Set Trial End</button></td></tr>'}).join("")
+ +'</tbody></table></div>':'<div class="empty">No organizations.</div>';
+ document.querySelectorAll("[data-org-status]").forEach(s=>{const o=orgs.find(x=>x.id===s.dataset.orgStatus);s.value=o.status;s.onchange=async()=>{await sb.from("organizations").update({status:s.value}).eq("id",o.id);await loadAll()}});
+ document.querySelectorAll("[data-org-plan]").forEach(sel=>{const sub=subs.find(x=>x.organization_id===sel.dataset.orgPlan);sel.value=sub?.plan_id||"";sel.onchange=async()=>{if(!sel.value){if(sub)await sb.from("subscriptions").update({plan_id:null}).eq("organization_id",sel.dataset.orgPlan)}else await sb.from("subscriptions").upsert({organization_id:sel.dataset.orgPlan,plan_id:sel.value,status:sub?.status||"trialing",provider:sub?.provider||"manual"},{onConflict:"organization_id"});await loadAll()}});
+ document.querySelectorAll("[data-trial]").forEach(b=>b.onclick=async()=>{const sub=subs.find(x=>x.organization_id===b.dataset.trial),current=sub?.trial_end?String(sub.trial_end).slice(0,10):"",d=prompt("Trial end date (YYYY-MM-DD):",current);if(d===null||!d.trim())return;await sb.from("subscriptions").upsert({organization_id:b.dataset.trial,plan_id:sub?.plan_id||null,status:"trialing",provider:sub?.provider||"manual",trial_end:new Date(d+"T23:59:59Z").toISOString()},{onConflict:"organization_id"});await loadAll()});
 }
-function renderFeatures(){
- $("features").innerHTML=features.map(f=>`<div class="card"><b>${esc(f.name)}</b><div class="muted">${esc(f.description||"")}</div><div style="margin-top:8px">Default: <b>${f.default_enabled?"ON":"OFF"}</b></div></div>`).join("");
+function renderPlans(){
+ $("plans").innerHTML=plans.length?'<div class="table-wrap"><table><thead><tr><th>Plan</th><th>Price</th><th>Trial</th><th>Stripe Price</th><th>Self-service</th></tr></thead><tbody>'+plans.map(p=>'<tr><td><b>'+esc(p.name)+'</b><br><small>'+esc(p.code)+'</small></td><td>'+money(p.price_cents/100)+' / '+esc(p.billing_interval||"")+'</td><td>'+Number(p.trial_days||0)+' days</td><td><small>'+esc(p.stripe_price_id||"Not configured")+'</small></td><td>'+(p.self_service_visible?"Yes":"No")+'</td></tr>').join("")+'</tbody></table></div>':'<div class="empty">No plans configured.</div>';
+}
+function renderBillingEvents(){
+ $("billingEvents").innerHTML=billingEvents.length?'<div class="table-wrap"><table><thead><tr><th>Date</th><th>Event</th><th>Status</th><th>Organization</th><th>Error</th></tr></thead><tbody>'+billingEvents.map(e=>'<tr><td>'+new Date(e.created_at).toLocaleString()+'</td><td>'+esc(e.event_type)+'</td><td>'+esc(e.status)+'</td><td>'+esc(orgs.find(o=>o.id===e.organization_id)?.name||"")+'</td><td><small>'+esc(e.error_message||"")+'</small></td></tr>').join("")+'</tbody></table></div>':'<div class="empty">No subscription billing events yet.</div>';
 }
 function renderReleases(){
- $("releases").innerHTML=releases.length?releases.map(r=>`<div class="card"><b>${esc(r.version)} — ${esc(r.title)}</b><div class="muted">${esc(r.status)} • ${new Date(r.created_at).toLocaleString()}</div><p>${esc(r.notes||"")}</p></div>`).join(""):'<div class="empty">No releases recorded yet.</div>';
+ $("releases").innerHTML=releases.length?releases.map(r=>'<div class="card"><b>'+esc(r.version)+' — '+esc(r.title)+'</b><div class="muted">'+esc(r.status)+' • '+new Date(r.created_at).toLocaleString()+'</div><p>'+esc(r.notes||"")+'</p></div>').join(""):'<div class="empty">No releases recorded.</div>';
 }
-$("loginBtn").onclick=async()=>{msg("Signing in…");const {error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error)return msg(error.message);await boot()};
-$("signupBtn").onclick=async()=>{msg("Creating owner login…");if($("email").value.trim().toLowerCase()!=="lutzcraftersmarket@gmail.com")return msg("Owner login must use lutzcraftersmarket@gmail.com.");const {error}=await sb.auth.signUp({email:$("email").value.trim(),password:$("password").value});msg(error?error.message:"Account created. Check your email if confirmation is required, then sign in.")};
-$("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.reload()};
-document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");["applications","accounts","releases"].forEach(t=>$(t+"Tab").classList.toggle("hidden",t!==b.dataset.tab))});
+async function sendCode(){pending=$("email").value.trim().toLowerCase();if(!pending)return;$("authMsg").textContent="Sending code…";const {error}=await sb.auth.signInWithOtp({email:pending,options:{shouldCreateUser:false}});if(error){$("authMsg").textContent=error.message;return}$("emailStage").classList.add("hidden");$("codeStage").classList.remove("hidden");$("authMsg").textContent="Enter the code from your email."}
+async function verifyCode(){const token=$("code").value.replace(/\D/g,"").slice(0,10);if(token.length<6)return $("authMsg").textContent="Enter the code from your email.";const {error}=await sb.auth.verifyOtp({email:pending,token,type:"email"});if(error){$("authMsg").textContent="Invalid or expired code.";return}await boot()}
+$("sendCode").onclick=sendCode;$("verifyCode").onclick=verifyCode;$("changeEmail").onclick=()=>{$("codeStage").classList.add("hidden");$("emailStage").classList.remove("hidden")};$("logout").onclick=async()=>{await sb.auth.signOut();location.reload()};
 $("search").oninput=renderApps;$("statusFilter").onchange=renderApps;
-$("csvBtn").onclick=()=>{const cols=["created_at","status","name","email","phone","organization","city_state","event_types","events_per_year","vendors_per_event","current_management","features_interested","use_real_event","report_bugs_feedback","biggest_headache","indispensable_feature","feedback_conversations","anything_else","admin_notes"];const csv=[cols.join(",")].concat(apps.map(r=>cols.map(c=>'"'+String(Array.isArray(r[c])?r[c].join("; "):(r[c]??"")).replaceAll('"','""')+'"').join(","))).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="ventryvo-beta-applications.csv";a.click();URL.revokeObjectURL(a.href)};
-$("pdfBtn").onclick=()=>window.print();
-$("createOrgBtn").onclick=async()=>{const name=$("orgName").value.trim(),slug=$("orgSlug").value.trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-|-$/g,"");if(!name||!slug)return alert("Enter organization name and slug.");const {error}=await sb.from("organizations").insert({name,slug,status:"trial"});if(error)return alert(error.message);$("orgName").value="";$("orgSlug").value="";await loadAll()};
-$("inviteBtn").onclick=async()=>{
- const orgId=$("inviteOrg").value,email=$("inviteEmail").value.trim(),fullName=$("inviteName").value.trim(),role=$("inviteRole").value;
- if(!orgId||!email){$("inviteMsg").textContent="Select an organization and enter an email.";return}
- $("inviteMsg").textContent="Sending invitation…";
- const {data:{session}}=await sb.auth.getSession();
- if(!session){$("inviteMsg").textContent="Your admin session expired. Sign in again.";return}
- const response=await fetch("https://hzxiljqrqmtzsksxsdyj.supabase.co/functions/v1/master-admin-api",{
-   method:"POST",
-   headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
-   body:JSON.stringify({action:"invite_customer",organization_id:orgId,email,full_name:fullName,role})
- });
- const result=await response.json().catch(()=>({}));
- if(!response.ok||result.error){$("inviteMsg").textContent=result.error||"Unable to invite customer.";return}
- $("inviteMsg").textContent=result.invited?"Invitation sent and membership created.":"Existing user added to the organization.";
- $("inviteEmail").value="";$("inviteName").value="";
-};
-$("releaseBtn").onclick=async()=>{const version=$("releaseVersion").value.trim(),title=$("releaseTitle").value.trim();if(!version||!title)return alert("Enter version and title.");const {error}=await sb.from("platform_releases").insert({version,title,notes:$("releaseNotes").value.trim(),status:"released",released_at:new Date().toISOString()});if(error)return alert(error.message);$("releaseVersion").value="";$("releaseTitle").value="";$("releaseNotes").value="";await loadAll()};
-sb.auth.onAuthStateChange(()=>setTimeout(boot,0));boot();
-</script>
-</body></html>
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");["applications","accounts","billing","releases"].forEach(t=>$(t+"Tab").classList.toggle("hidden",t!==b.dataset.tab))});
+$("csvBtn").onclick=()=>{const cols=["created_at","status","name","email","phone","organization","city_state","events_per_year","vendors_per_event","biggest_headache","admin_notes"],csv=[cols.join(",")].concat(apps.map(r=>cols.map(c=>'"'+String(r[c]??"").replaceAll('"','""')+'"').join(","))).join("\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="ventryvo-signups.csv";a.click()};
+$("createOrgBtn").onclick=async()=>{const name=$("orgName").value.trim(),slug=$("orgSlug").value.trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-|-$/g,""),plan=$("orgPlan").value;if(!name||!slug)return alert("Enter organization name and slug.");const {data:o,error}=await sb.from("organizations").insert({name,slug,status:"trial"}).select().single();if(error)return alert(error.message);if(plan)await sb.from("subscriptions").insert({organization_id:o.id,plan_id:plan,status:"trialing",provider:"manual"});$("orgName").value="";$("orgSlug").value="";await loadAll()};
+$("inviteBtn").onclick=async()=>{const organization_id=$("inviteOrg").value,email=$("inviteEmail").value.trim(),full_name=$("inviteName").value.trim(),role=$("inviteRole").value;if(!organization_id||!email)return $("inviteMsg").textContent="Select an organization and enter email.";try{const x=await edge("master-admin-api",{action:"invite_customer",organization_id,email,full_name,role});$("inviteMsg").textContent=x.invited?"Invitation sent.":"Existing user linked.";await loadAll()}catch(e){$("inviteMsg").textContent=e.message}};
+$("planForm").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),code=String(f.get("code")||"").trim().toLowerCase().replace(/[^a-z0-9_-]+/g,"-"),payload={name:String(f.get("name")||"").trim(),code,price_cents:Math.round(Number(f.get("price")||0)*100),billing_interval:f.get("interval"),trial_days:Number(f.get("trial")||0),stripe_price_id:String(f.get("stripe")||"").trim()||null,self_service_visible:f.get("visible")==="on",active:true};const {error}=await sb.from("plans").insert(payload);if(error)return alert(error.message);e.currentTarget.reset();await loadAll()};
+$("releaseBtn").onclick=async()=>{const version=$("releaseVersion").value.trim(),title=$("releaseTitle").value.trim();if(!version||!title)return;const {error}=await sb.from("platform_releases").insert({version,title,notes:$("releaseNotes").value.trim(),status:"released",released_at:new Date().toISOString()});if(error)return alert(error.message);await loadAll()};
+sb.auth.onAuthStateChange(()=>setTimeout(()=>boot().catch(e=>$("authMsg").textContent=e.message),0));boot().catch(e=>$("authMsg").textContent=e.message);
+</script></body></html>
