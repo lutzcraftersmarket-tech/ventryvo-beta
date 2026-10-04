@@ -7,37 +7,99 @@
 .wrap{width:min(820px,calc(100% - 24px));margin:24px auto 60px}.hero,.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:14px}
 .brand{font-weight:950;letter-spacing:.13em;color:var(--navy)}h1,h2{color:var(--navy)}.muted{color:var(--muted);line-height:1.5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{margin-top:12px}
 label{display:block;font-weight:750;margin-bottom:6px}input,select,textarea{width:100%;padding:12px;border:1px solid #cfd7e3;border-radius:10px;font:inherit}textarea{min-height:110px}
-button{border:0;border-radius:10px;padding:13px 18px;font:inherit;font-weight:850;background:var(--blue);color:#fff;cursor:pointer}.notice{padding:13px;border-radius:10px;background:#eef6ff;border:1px solid #bfd6ff;margin-top:12px}.success{background:#ecfdf3;border-color:#abefc6;color:#067647}.error{background:#fff1f0;border-color:#fecaca;color:#b42318}.hidden{display:none!important}.choice{display:flex;gap:8px;align-items:flex-start;margin-top:10px}.choice input{width:auto;margin-top:3px}
+button{border:0;border-radius:10px;padding:13px 18px;font:inherit;font-weight:850;background:var(--blue);color:#fff;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
+.notice{padding:13px;border-radius:10px;background:#eef6ff;border:1px solid #bfd6ff;margin-top:12px}.success{background:#ecfdf3;border-color:#abefc6;color:#067647}.warn{background:#fffaeb;border-color:#fedf89;color:#7a2e0e}.error{background:#fff1f0;border-color:#fecaca;color:#b42318}.hidden{display:none!important}.choice{display:flex;gap:8px;align-items:flex-start;margin-top:10px}.choice input{width:auto;margin-top:3px}.progressline{height:7px;border-radius:999px;background:#e5e7eb;overflow:hidden;margin-top:10px}.progressline span{display:block;height:100%;background:#2563eb;width:0%}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.hero,.card{padding:18px}}
 </style></head><body>
 <main class="wrap">
-<section class="hero"><div class="brand">VENTRYVO</div><h1 id="eventName">Vendor Application</h1><p id="eventInfo" class="muted">Loading application…</p></section>
+<section class="hero"><div class="brand">VENTRYVO</div><h1 id="eventName">Vendor Application</h1><p id="eventInfo" class="muted">Loading application…</p><div id="draftStatus" class="muted"></div></section>
 <section id="loading" class="card">Loading…</section>
 <section id="formCard" class="card hidden"><h2 id="formTitle">Vendor Application</h2><p id="intro" class="muted"></p>
-<form id="form">
+<form id="form" novalidate>
 <div class="grid">
-<div class="field"><label>Business name</label><input name="business" required></div><div class="field"><label>Contact name</label><input name="contact" required></div>
-<div class="field"><label>Email</label><input name="email" type="email" required></div><div class="field"><label>Phone</label><input name="phone" required></div>
-<div class="field"><label>Website</label><input name="website" type="url"></div><div class="field"><label>Facebook</label><input name="facebook" type="url"></div>
-<div class="field"><label>Instagram</label><input name="instagram" type="url"></div><div class="field"><label>Vendor category</label><select id="category" name="category" required></select></div>
+<div class="field"><label>Business name</label><input name="business" required autocomplete="organization"></div><div class="field"><label>Contact name</label><input name="contact" required autocomplete="name"></div>
+<div class="field"><label>Email</label><input name="email" type="email" required autocomplete="email"></div><div class="field"><label>Phone</label><input name="phone" required autocomplete="tel"></div>
+<div class="field"><label>Website</label><input name="website" type="url" autocomplete="url"></div><div class="field"><label>Facebook</label><input name="facebook" type="url" placeholder="https://"></div>
+<div class="field"><label>Instagram</label><input name="instagram" type="url" placeholder="https://"></div><div class="field"><label>Vendor category</label><select id="category" name="category" required></select></div>
 <div class="field"><label>Space type</label><select id="space" name="space" required></select></div>
 </div>
-<div class="field"><label>What do you sell?</label><textarea name="what" required></textarea></div>
+<div class="field"><label>What do you sell?</label><textarea name="what" required placeholder="Describe the products or services you plan to offer."></textarea></div>
+<div id="categoryWarn" class="notice warn hidden"></div>
+<div class="field"><label>Special requests or setup notes <span class="muted">(optional)</span></label><textarea name="special" maxlength="2000" placeholder="Examples: access to an outlet, mobility/accessibility request, prefer wall space, extra display, or anything the organizer should know."></textarea></div>
 <div id="photosWrap" class="field"><label>Product / booth photos</label><input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple><small id="photoHelp" class="muted"></small></div>
 <label id="termsChoice" class="choice"><input id="terms" type="checkbox"><span id="termsText">I agree to the vendor terms.</span></label>
 <label id="paymentChoice" class="choice hidden"><input id="paymentReady" type="checkbox"><span id="paymentText"></span></label>
-<div id="error" class="notice error hidden"></div><button id="submitBtn" type="submit" style="margin-top:16px">Submit Application</button>
+<div id="error" class="notice error hidden"></div>
+<div id="submitProgress" class="hidden"><p class="muted" id="submitProgressText">Preparing application…</p><div class="progressline"><span id="submitProgressBar"></span></div></div>
+<button id="submitBtn" type="submit" style="margin-top:16px">Submit Application</button>
 </form></section><section id="done" class="card hidden"></section>
 </main>
 <script type="module">
 import {SUPABASE_URL} from "/js/supabase-config.js";
 const $=id=>document.getElementById(id);
 const parts=location.pathname.split("/").filter(Boolean),org=decodeURIComponent(parts[1]||""),eventSlug=decodeURIComponent(parts[2]||"");
-let cfg=null;
+let cfg=null,recoveryToken="",draftStarting=null,draftTimer=null,restoring=false,lastDraftJson="";
+
 async function call(action,body={}){
  const r=await fetch(SUPABASE_URL+"/functions/v1/public-vendor-application",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,organization_slug:org,event_slug:eventSlug,...body})});
  const x=await r.json().catch(()=>({}));if(!r.ok||x.error)throw new Error(x.error||"Request failed");return x;
 }
+const clean=value=>String(value||"").toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9&/' -]+/g," ").replace(/\s+/g," ").trim();
+const generic=new Set(["art","goods","good","product","products","item","items","business","service","services","handmade","artist","practical","other","category","non","profit","mlm","no","not","the","and","or","etc","do","use","for","a","an","sold","out"]);
+function variants(word){const w=clean(word),out=[w];if(/ies$/.test(w))out.push(w.replace(/ies$/,"y"));else if(/s$/.test(w)&&!/(ss|us)$/.test(w))out.push(w.slice(0,-1));return [...new Set(out.filter(Boolean))]}
+function categoryTerms(name){const raw=String(name||"").replace(/\([^)]*\)/g," "),words=clean(raw).split(" ").filter(w=>w.length>2&&!generic.has(w)),terms=[];if(words.length)terms.push(words.join(" "));for(const w of words)terms.push(...variants(w));return [...new Set(terms.filter(t=>t.length>2))]}
+function containsTerm(text,term){return (" "+clean(text)+" ").includes(" "+clean(term)+" ")}
+function categoryReview(){
+ if(!cfg)return {needsReview:false,matched:[]};
+ const what=document.querySelector('[name="what"]')?.value||"",selectedId=$("category").value,selectedName=cfg.categories.find(c=>c.id===selectedId)?.name||"",text=clean(what),selected=clean(selectedName);
+ if(!text||!selected)return {needsReview:false,matched:[]};
+ const names=cfg.categories.map(c=>c.name).filter(Boolean),matched=[...new Set(names.filter(name=>categoryTerms(name).some(term=>containsTerm(text,term))))],selectedMatched=matched.some(n=>clean(n)===selected),overlaps=matched.filter(n=>clean(n)!==selected),selectedOther=selected.startsWith("other ");
+ const needsReview=!selectedMatched||selectedOther||overlaps.length>0,possible=(!selectedMatched?matched:overlaps);
+ let message="";
+ if(needsReview&&!matched.length)message="We could not automatically confirm that the products you described match the selected category. Your application will still be submitted for organizer review.";
+ else if(needsReview&&possible.length)message=(!selectedMatched||selectedOther?"Some products you listed may fit ":"Some products you listed may also overlap with ")+possible.join(", ")+". Your application will still be submitted for organizer review.";
+ return {needsReview,matched,overlaps,selected_category:selectedName,selectedMatched,message};
+}
+function drawCategoryWarning(){
+ const r=categoryReview();$("categoryWarn").classList.toggle("hidden",!r.needsReview);$("categoryWarn").textContent=r.message||"Category review may be needed.";
+}
+function snapshot(){
+ const f=$("form");
+ return {
+  business:f.business.value.trim(),contact:f.contact.value.trim(),email:f.email.value.trim(),phone:f.phone.value.trim(),
+  website:f.website.value.trim(),facebook:f.facebook.value.trim(),instagram:f.instagram.value.trim(),
+  category:f.category.value,space:f.space.value,what:f.what.value,special:f.special.value,
+  terms:$("terms").checked,payment_ready:$("paymentReady").checked
+ };
+}
+function restoreDraft(d){
+ if(!d)return;restoring=true;const f=$("form"),x=d.draft_data||{};
+ for(const [name,key] of [["business","business"],["contact","contact"],["email","email"],["phone","phone"],["website","website"],["facebook","facebook"],["instagram","instagram"],["what","what"],["special","special"]])if(x[key]!=null&&f.elements[name])f.elements[name].value=x[key];
+ if(d.business_name&&!f.business.value)f.business.value=d.business_name;if(d.contact_name&&!f.contact.value)f.contact.value=d.contact_name;if(d.email&&!f.email.value)f.email.value=d.email;if(d.phone&&!f.phone.value)f.phone.value=d.phone;
+ if(x.category)$("category").value=x.category;if(x.space)$("space").value=x.space;$("terms").checked=!!x.terms;$("paymentReady").checked=!!x.payment_ready;
+ recoveryToken=d.recovery_token||recoveryToken;lastDraftJson=JSON.stringify(snapshot());$("draftStatus").textContent="Recovered your saved application. You can continue where you left off.";drawCategoryWarning();restoring=false;
+}
+async function ensureDraft(){
+ if(recoveryToken)return recoveryToken;if(draftStarting)return draftStarting;
+ const s=snapshot();if(!s.email||!s.business||!s.contact||!s.phone)return "";
+ draftStarting=(async()=>{const x=await call("start_draft",{email:s.email,business_name:s.business,contact_name:s.contact,phone:s.phone,draft_data:s,last_step:"application"});recoveryToken=x.recovery_token;$("draftStatus").textContent="Application progress is being saved automatically.";lastDraftJson=JSON.stringify(s);return recoveryToken})().finally(()=>draftStarting=null);
+ return draftStarting;
+}
+async function saveDraft(errorMessage=""){
+ if(restoring)return;const token=await ensureDraft();if(!token)return;
+ const s=snapshot(),json=JSON.stringify(s);if(!errorMessage&&json===lastDraftJson)return;
+ await call("save_draft",{recovery_token:token,email:s.email,business_name:s.business,contact_name:s.contact,phone:s.phone,draft_data:s,last_step:"application",last_page_url:location.href,error_message:errorMessage});lastDraftJson=json;
+ if(!errorMessage)$("draftStatus").textContent="Application progress saved.";
+}
+function scheduleDraft(){
+ if(restoring)return;clearTimeout(draftTimer);draftTimer=setTimeout(()=>saveDraft().catch(e=>{$("draftStatus").textContent=e.message}),800);
+}
+async function upload(file,token){
+ const fd=new FormData();fd.append("organization_slug",org);fd.append("event_slug",eventSlug);fd.append("draft_token",token);fd.append("file",file);
+ const r=await fetch(SUPABASE_URL+"/functions/v1/public-vendor-media",{method:"POST",body:fd});const x=await r.json().catch(()=>({}));
+ if(!r.ok||x.error)throw new Error(x.error||"Photo upload failed");return x.path;
+}
+function progress(text,pct){$("submitProgress").classList.remove("hidden");$("submitProgressText").textContent=text;$("submitProgressBar").style.width=Math.max(0,Math.min(100,pct))+"%"}
 async function load(){
  try{
   cfg=await call("config");$("eventName").textContent=cfg.event.name;
@@ -48,26 +110,27 @@ async function load(){
   $("photosWrap").classList.toggle("hidden",!cfg.settings.require_photos);$("photoHelp").textContent=cfg.settings.require_photos?"At least "+Number(cfg.settings.minimum_photos||1)+" photo(s) required.":"";
   $("termsChoice").classList.toggle("hidden",!cfg.settings.require_terms_acknowledgement);$("termsText").textContent=cfg.settings.terms_text||"I agree to the vendor terms and event rules.";
   $("paymentChoice").classList.toggle("hidden",!cfg.settings.require_payment_readiness_acknowledgement);$("paymentText").textContent=cfg.settings.payment_readiness_text||"If approved, I am prepared to pay the invoice promptly.";
+  const recover=new URL(location.href).searchParams.get("recover");if(recover){recoveryToken=recover;try{const x=await call("recover",{recovery_token:recover});restoreDraft(x.draft)}catch(e){$("draftStatus").textContent=e.message}}
   $("loading").classList.add("hidden");$("formCard").classList.remove("hidden");
  }catch(e){$("loading").innerHTML='<div class="notice error">'+e.message+'</div>'}
 }
-async function upload(file,token){
- const fd=new FormData();fd.append("organization_slug",org);fd.append("event_slug",eventSlug);fd.append("draft_token",token);fd.append("file",file);
- const r=await fetch(SUPABASE_URL+"/functions/v1/public-vendor-media",{method:"POST",body:fd});const x=await r.json().catch(()=>({}));
- if(!r.ok||x.error)throw new Error(x.error||"Photo upload failed");return x.path;
-}
+$("form").addEventListener("input",e=>{if(["what","category"].includes(e.target.name)||e.target.id==="category")drawCategoryWarning();scheduleDraft()});
+$("form").addEventListener("change",e=>{if(e.target.id==="category")drawCategoryWarning();scheduleDraft()});
 $("form").onsubmit=async e=>{
- e.preventDefault();$("error").classList.add("hidden");const f=new FormData(e.currentTarget);
+ e.preventDefault();$("error").classList.add("hidden");const f=e.currentTarget;
+ if(!f.reportValidity())return;
  if(cfg.settings.require_terms_acknowledgement&&!$("terms").checked){$("error").textContent="Please acknowledge the vendor terms.";$("error").classList.remove("hidden");return}
  if(cfg.settings.require_payment_readiness_acknowledgement&&!$("paymentReady").checked){$("error").textContent="Please acknowledge the payment-readiness statement.";$("error").classList.remove("hidden");return}
  const files=[...$("photos").files];if(cfg.settings.require_photos&&files.length<Number(cfg.settings.minimum_photos||1)){$("error").textContent="Please upload the required photos.";$("error").classList.remove("hidden");return}
- const btn=$("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
+ const btn=$("submitBtn");btn.disabled=true;progress("Saving your application…",10);
  try{
-  const draft=await call("start_draft",{email:f.get("email"),business_name:f.get("business"),contact_name:f.get("contact"),phone:f.get("phone")});
-  const media=[];for(const file of files)media.push(await upload(file,draft.recovery_token));
-  const x=await call("submit",{recovery_token:draft.recovery_token,business_name:f.get("business"),contact_name:f.get("contact"),email:f.get("email"),phone:f.get("phone"),website:f.get("website"),facebook_url:f.get("facebook"),instagram_url:f.get("instagram"),what_they_sell:f.get("what"),space_type_id:f.get("space"),event_category_id:f.get("category"),media_paths:media,terms_acknowledged:$("terms").checked,payment_readiness_acknowledged:$("paymentReady").checked});
-  $("formCard").classList.add("hidden");$("done").classList.remove("hidden");$("done").innerHTML='<h2>Application received</h2><div class="notice success">'+(x.status==="waitlist"?"Your application was received and is currently on the wait list.":"Your application was submitted for review.")+'</div><p class="muted">Keep an eye on your email for the next update.</p>';
- }catch(err){$("error").textContent=err.message;$("error").classList.remove("hidden");btn.disabled=false;btn.textContent="Submit Application"}
+  const token=await ensureDraft();if(!token)throw new Error("Complete your business name, contact name, email and phone first.");
+  await saveDraft();const media=[];let n=0;
+  for(const file of files){n++;progress("Uploading photo "+n+" of "+files.length+"…",10+Math.round(55*n/Math.max(1,files.length)));media.push(await upload(file,token))}
+  progress("Submitting application…",75);const cr=categoryReview();
+  const x=await call("submit",{recovery_token:token,business_name:f.business.value,contact_name:f.contact.value,email:f.email.value,phone:f.phone.value,website:f.website.value,facebook_url:f.facebook.value,instagram_url:f.instagram.value,what_they_sell:f.what.value,special_requests:f.special.value,space_type_id:f.space.value,event_category_id:f.category.value,media_paths:media,terms_acknowledged:$("terms").checked,payment_readiness_acknowledged:$("paymentReady").checked,category_review:cr});
+  progress("Application complete.",100);$("formCard").classList.add("hidden");$("done").classList.remove("hidden");$("done").innerHTML='<h2>Application received</h2><div class="notice success">'+(x.status==="waitlist"?"Your application was received and is currently on the wait list.":"Your application was submitted for review.")+'</div><p class="muted">Keep an eye on your email for the next update.</p>';$("draftStatus").textContent="";
+ }catch(err){try{await saveDraft(err.message||"Application submission failed.")}catch{}$("error").textContent=err.message;$("error").classList.remove("hidden");$("submitProgress").classList.add("hidden");btn.disabled=false}
 };
 load();
 </script></body></html>

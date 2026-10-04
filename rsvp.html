@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shopper RSVP | VENTRYVO</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#d9e0ea;--bg:#f4f7fb;--blue:#2563eb;--navy:#172554}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{width:min(700px,calc(100% - 24px));margin:28px auto 60px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:14px}
+.brand{font-weight:950;letter-spacing:.13em;color:var(--navy)}h1,h2{color:var(--navy)}.muted{color:var(--muted);line-height:1.5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-top:12px}label{display:block;font-weight:750;margin-bottom:6px}input,select,textarea{width:100%;padding:12px;border:1px solid #cfd7e3;border-radius:10px;font:inherit}textarea{min-height:100px}
+button{border:0;border-radius:10px;padding:13px 18px;font:inherit;font-weight:850;background:var(--blue);color:#fff;cursor:pointer}button:disabled{opacity:.55}.notice{padding:13px;border-radius:10px;background:#eef6ff;border:1px solid #bfd6ff;margin-top:12px}.success{background:#ecfdf3;border-color:#abefc6;color:#067647}.error{background:#fff1f0;border-color:#fecaca;color:#b42318}.hidden{display:none!important}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.card{padding:18px}}
+</style></head><body>
+<main class="wrap">
+<section class="card"><div class="brand">VENTRYVO</div><h1 id="eventName">Free Shopper RSVP</h1><p id="eventInfo" class="muted">Loading event…</p><p id="description"></p></section>
+<section id="loading" class="card">Loading RSVP…</section>
+<section id="formCard" class="card hidden"><h2>Reserve your free RSVP</h2><p class="muted">This RSVP helps the organizer estimate attendance. It is not a paid ticket.</p>
+<form id="form"><div class="grid">
+<div class="field"><label>Your name</label><input name="name" required autocomplete="name"></div>
+<div class="field"><label>Email</label><input name="email" type="email" required autocomplete="email"></div>
+<div class="field"><label>Party size</label><input name="party" type="number" min="1" max="50" value="1" required></div>
+<div class="field"><label>How did you hear about this event?</label><select name="source"><option value="">Choose one</option><option>Facebook</option><option>Instagram</option><option>Friend or family</option><option>Vendor</option><option>Google</option><option>Event listing</option><option>Hotel / venue</option><option>Other</option></select></div>
+</div>
+<div class="field"><label>Referral detail <span class="muted">(optional)</span></label><input name="detail" placeholder="Vendor name, group/page name, etc."></div>
+<div class="field"><label>Notes <span class="muted">(optional)</span></label><textarea name="notes" placeholder="Anything you'd like the organizer to know"></textarea></div>
+<div id="error" class="notice error hidden"></div><button id="submitBtn" type="submit" style="margin-top:16px">Submit Free RSVP</button>
+</form></section>
+<section id="done" class="card hidden"></section>
+</main>
+<script type="module">
+import {SUPABASE_URL} from "/js/supabase-config.js";
+const $=id=>document.getElementById(id),parts=location.pathname.split("/").filter(Boolean),org=decodeURIComponent(parts[1]||""),eventSlug=decodeURIComponent(parts[2]||"");
+let cfg=null;
+async function call(action,body={}){
+ const r=await fetch(SUPABASE_URL+"/functions/v1/public-event-api",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,organization_slug:org,event_slug:eventSlug,...body})});
+ const x=await r.json().catch(()=>({}));if(!r.ok||x.error)throw new Error(x.error||"Request failed");return x;
+}
+async function load(){
+ try{
+  cfg=await call("config");const e=cfg.event;$("eventName").textContent=e.name;$("eventInfo").textContent=new Date(e.starts_at).toLocaleString()+" • "+(e.venue_name||e.address||"");$("description").textContent=e.description||"";
+  if(!e.rsvp_enabled){$("loading").innerHTML='<div class="notice">Shopper RSVP is not currently open for this event.</div>';return}
+  const cap=e.rsvp_capacity==null?"":(" RSVP capacity: "+Number(e.rsvp_capacity).toLocaleString()+".");
+  $("loading").classList.add("hidden");$("formCard").classList.remove("hidden");$("formCard").querySelector(".muted").textContent="This RSVP helps the organizer estimate attendance. It is not a paid ticket."+cap;
+ }catch(e){$("loading").innerHTML='<div class="notice error">'+e.message+'</div>'}
+}
+$("form").onsubmit=async e=>{
+ e.preventDefault();if(!e.currentTarget.reportValidity())return;$("error").classList.add("hidden");const f=new FormData(e.currentTarget),btn=$("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
+ try{
+  const x=await call("rsvp",{name:f.get("name"),email:f.get("email"),party_size:Number(f.get("party")||1),referral_source:f.get("source"),referral_detail:f.get("detail"),notes:f.get("notes")});
+  $("formCard").classList.add("hidden");$("done").classList.remove("hidden");$("done").innerHTML='<h2>RSVP confirmed</h2><div class="notice success">Thanks, '+String(x.rsvp.name||"").replace(/[<>]/g,"")+'! Your free RSVP for '+Number(x.rsvp.party_size||1)+' has been recorded.</div><p class="muted">We look forward to seeing you at the event.</p>';
+ }catch(err){$("error").textContent=err.message;$("error").classList.remove("hidden");btn.disabled=false;btn.textContent="Submit Free RSVP"}
+};
+load();
+</script></body></html>

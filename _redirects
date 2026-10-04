@@ -3,3 +3,4 @@
 /setup /setup.html 200
 /apply/* /apply.html 200
 /pay/* /pay.html 200
+/rsvp/* /rsvp.html 200

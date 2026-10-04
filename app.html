@@ -73,7 +73,16 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.22);max-width:min(92vw,720px)}
 .placeholder{padding:34px;text-align:center}
 .feature{display:inline-block;background:#eef4ff;border-radius:999px;padding:6px 9px;margin:4px;font-size:12px}
-.vendor-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:14px 0}.vendor-toolbar .field{flex:1;min-width:180px}.status-active{background:#ecfdf3;color:#067647}.status-inactive{background:#f2f4f7;color:#475467}.status-banned{background:#fff1f0;color:#b42318}\n.status-pending,.status-draft,.status-reserved{background:#fffaeb;color:#854d0e}.status-approved,.status-paid,.status-confirmed,.status-connected,.status-published{background:#ecfdf3;color:#067647}.status-waitlist,.status-partial,.status-trialing{background:#eef4ff;color:#274690}.status-declined,.status-cancelled,.status-failed,.status-suspended,.status-past_due{background:#fff1f0;color:#b42318}.metric-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.mini-metric{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff}.mini-metric b{font-size:22px;display:block;color:var(--navy)}.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}.provider-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.provider-card{border:1px solid var(--line);border-radius:13px;padding:14px;background:#fff}.linkbox{display:flex;gap:8px;align-items:center}.linkbox input{font-size:13px}.subnav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.subnav button{padding:8px 11px}@media(max-width:850px){.metric-row,.provider-grid,.split{grid-template-columns:1fr 1fr}}@media(max-width:520px){.metric-row,.provider-grid,.split{grid-template-columns:1fr}}
+.vendor-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:14px 0}.vendor-toolbar .field{flex:1;min-width:180px}.status-active{background:#ecfdf3;color:#067647}.status-inactive{background:#f2f4f7;color:#475467}.status-banned{background:#fff1f0;color:#b42318}
+.status-pending,.status-draft,.status-reserved{background:#fffaeb;color:#854d0e}.status-approved,.status-paid,.status-confirmed,.status-connected,.status-published{background:#ecfdf3;color:#067647}.status-waitlist,.status-partial,.status-trialing{background:#eef4ff;color:#274690}.status-declined,.status-cancelled,.status-failed,.status-suspended,.status-past_due{background:#fff1f0;color:#b42318}.metric-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.mini-metric{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff}.mini-metric b{font-size:22px;display:block;color:var(--navy)}.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}.provider-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.provider-card{border:1px solid var(--line);border-radius:13px;padding:14px;background:#fff}.linkbox{display:flex;gap:8px;align-items:center}.linkbox input{font-size:13px}.subnav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.subnav button{padding:8px 11px}@media(max-width:850px){.metric-row,.provider-grid,.split{grid-template-columns:1fr 1fr}}@media(max-width:520px){.metric-row,.provider-grid,.split{grid-template-columns:1fr}}
+.parity-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.parity-tabs button{background:#fff;border:1px solid var(--line)}.parity-tabs button.active{background:var(--blue);color:#fff}
+.attention{border-left:4px solid #f59e0b}.danger-note{border-left:4px solid var(--danger)}
+.floor-plan{position:relative;max-width:760px;height:900px;margin:16px auto;border:3px solid #344054;border-radius:12px;background:linear-gradient(#f7f5e8,#ebe6c9);overflow:hidden;touch-action:none}
+.floor-plan:before{content:"EVENT FLOOR PLAN";position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:900;letter-spacing:.12em;color:#667085}
+.vendor-node{position:absolute;width:27%;min-width:120px;height:78px;border:2px solid #344054;background:#fff;border-radius:10px;padding:7px;box-shadow:0 3px 8px rgba(0,0,0,.12);cursor:grab;user-select:none;touch-action:none;overflow:hidden}
+.vendor-node.dragging{cursor:grabbing;box-shadow:0 9px 24px rgba(0,0,0,.25);z-index:4}.vendor-node b{display:block;font-size:12px}.vendor-node small{font-size:10px;color:var(--muted)}
+.dialog-backdrop{border:0;border-radius:16px;max-width:min(760px,calc(100vw - 24px));width:100%;padding:0;box-shadow:0 20px 70px rgba(0,0,0,.3)}.dialog-backdrop::backdrop{background:rgba(15,23,42,.48)}.dialog-body{padding:20px}.dialog-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.dialog-head button{padding:7px 10px}
+.compact-table td,.compact-table th{padding:7px}.nowrap{white-space:nowrap}.redflag{background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:10px;margin-top:10px}
 @media(max-width:850px){
  .cards{grid-template-columns:repeat(2,1fr)}
  .grid2,.grid3{grid-template-columns:1fr}
@@ -145,7 +154,10 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
   <button data-nav="applications">Applications</button>
   <button data-nav="bookings">Bookings</button>
   <button data-nav="billing">Billing</button>
-  <button data-nav="checkin">Check-In</button>
+  <button data-nav="checkin">Event Day</button>
+  <button data-nav="communications">Communications</button>
+  <button data-nav="shoppers">Shopper RSVPs</button>
+  <button data-nav="floorplan">Floor Plan</button>
   <button data-nav="staff">Staff</button>
   <button data-nav="reports">Reports</button>
   <button data-nav="settings">Settings</button>
@@ -249,12 +261,17 @@ th{font-size:12px;text-transform:uppercase;color:var(--muted)}
  <section id="bookingsPanel" data-panel="bookings" class="hidden"></section>
  <section id="billingPanel" data-panel="billing" class="hidden"></section>
  <section id="checkinPanel" data-panel="checkin" class="hidden"></section>
+ <section id="communicationsPanel" data-panel="communications" class="hidden"></section>
+ <section id="shoppersPanel" data-panel="shoppers" class="hidden"></section>
+ <section id="floorplanPanel" data-panel="floorplan" class="hidden"></section>
  <section id="staffPanel" data-panel="staff" class="hidden"></section>
  <section id="reportsPanel" data-panel="reports" class="hidden"></section>
  <section id="settingsPanel" data-panel="settings" class="hidden"></section>
 </main>
 
 <div id="toast" class="toast hidden"></div>
-<script type="module" src="/js/customer-portal.js?v=20261004-big1"></script>\n<script type="module" src="/js/operations.js?v=20261004-big1"></script>
+<script type="module" src="/js/customer-portal.js?v=20261004-big1"></script>
+<script type="module" src="/js/operations.js?v=20261004-big1"></script>
+<script type="module" src="/js/trinity-parity.js?v=20261004-parity1"></script>
 </body>
 </html>
