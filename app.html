@@ -1,45 +1,243 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VENTRYVO Customer Portal</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>VENTRYVO Customer Portal</title>
 <style>
-:root{--ink:#172033;--muted:#667085;--line:#d9e0ea;--bg:#f4f7fb;--blue:#2563eb;--navy:#172554;--green:#0f766e}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
-.shell{width:min(1180px,calc(100% - 28px));margin:26px auto 60px}.hidden{display:none!important}.login{width:min(500px,calc(100% - 28px));margin:70px auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}
-header{background:linear-gradient(135deg,var(--navy),#1e3a8a 58%,var(--green));color:#fff;padding:22px 24px;border-radius:20px;display:flex;justify-content:space-between;gap:16px;align-items:center}.brand{font-weight:900;letter-spacing:.13em}
-input,select{width:100%;padding:11px 12px;border:1px solid #cfd7e3;border-radius:9px;font:inherit}button,.btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--blue);color:#fff}.light{background:#fff;border:1px solid var(--line)}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}.card strong{font-size:28px;display:block}.muted{color:var(--muted)}.nav{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.nav button.active{background:var(--blue);color:#fff}.feature{display:inline-block;background:#eef4ff;border-radius:999px;padding:6px 9px;margin:4px;font-size:12px}
-@media(max-width:850px){.cards{grid-template-columns:repeat(2,1fr)}header{flex-direction:column;align-items:flex-start}}
-</style></head><body>
-<section id="login" class="login"><div class="brand" style="color:#1d4ed8">VENTRYVO</div><h1>Customer Portal</h1><p class="muted">Sign in with the account attached to your organization.</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password" style="margin-top:8px"><button id="loginBtn" class="primary" style="margin-top:10px">Sign In</button><p id="msg" class="muted"></p></section>
-<main id="app" class="shell hidden"><header><div><div class="brand">VENTRYVO</div><div id="orgTitle" style="opacity:.82;margin-top:4px">Customer Workspace</div></div><button id="logoutBtn" class="light">Sign Out</button></header>
-<div class="cards"><div class="card"><strong id="eventsCount">0</strong><span>Events</span></div><div class="card"><strong id="vendorsCount">0</strong><span>Vendors</span></div><div class="card"><strong id="appsCount">0</strong><span>Applications</span></div><div class="card"><strong id="invoicesCount">0</strong><span>Invoices</span></div></div>
-<div class="nav"><button class="active">Dashboard</button><button>Events</button><button>Vendors</button><button>Applications</button><button>Billing</button><button>Staff</button><button>Reports</button></div>
-<section class="panel"><h2>Your VENTRYVO System</h2><p id="membership" class="muted"></p><h3>Enabled Features</h3><div id="features"></div></section>
-<section class="panel"><h2>Platform Updates</h2><p class="muted">VENTRYVO uses one shared application codebase. Platform fixes and security updates deploy automatically to all customer workspaces. New features can be staged with account-level feature flags.</p><div id="release"></div></section>
-</main>
-<script type="module">
-import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "/js/supabase-config.js";
-const sb=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY),$=id=>document.getElementById(id);
-async function boot(){
- const {data:{user}}=await sb.auth.getUser();if(!user){$("login").classList.remove("hidden");$("app").classList.add("hidden");return}
- const {data:m,error}=await sb.from("organization_memberships").select("role,organization_id,organizations(id,name,slug,status)").eq("user_id",user.id).eq("status","active").limit(1).maybeSingle();
- if(error||!m){$("msg").textContent="Your login works, but no VENTRYVO organization has been assigned to this account yet.";await sb.auth.signOut();return}
- const org=m.organizations;$("login").classList.add("hidden");$("app").classList.remove("hidden");$("orgTitle").textContent=org.name;$("membership").textContent="Role: "+m.role+" • Account status: "+org.status;
- const orgId=org.id;
- const [e,v,a,i,flags,overrides,rel]=await Promise.all([
-  sb.from("events").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
-  sb.from("vendors").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
-  sb.from("event_applications").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
-  sb.from("invoices").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
-  sb.from("feature_flags").select("*"),
-  sb.from("organization_feature_overrides").select("feature_flag_id,enabled").eq("organization_id",orgId),
-  sb.from("platform_releases").select("*").eq("status","released").order("released_at",{ascending:false}).limit(1).maybeSingle()
- ]);
- $("eventsCount").textContent=e.count||0;$("vendorsCount").textContent=v.count||0;$("appsCount").textContent=a.count||0;$("invoicesCount").textContent=i.count||0;
- const map=new Map((overrides.data||[]).map(x=>[x.feature_flag_id,x.enabled]));
- const enabled=(flags.data||[]).filter(f=>map.has(f.id)?map.get(f.id):f.default_enabled);
- $("features").innerHTML=enabled.length?enabled.map(f=>'<span class="feature">'+f.name+'</span>').join(""):'<span class="muted">No optional features enabled yet.</span>';
- $("release").innerHTML=rel.data?'<b>'+rel.data.version+' — '+rel.data.title+'</b><p>'+((rel.data.notes)||"")+'</p>':'<span class="muted">No release notes yet.</span>';
+:root{
+ --ink:#172033;--muted:#667085;--line:#d9e0ea;--bg:#f4f7fb;--card:#fff;
+ --blue:#2563eb;--blue2:#1d4ed8;--navy:#172554;--green:#0f766e;--soft:#eef4ff;
+ --danger:#b42318;--warn:#9a6700
 }
-$("loginBtn").onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error)$("msg").textContent=error.message;else boot()};
-$("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.reload()};sb.auth.onAuthStateChange(()=>setTimeout(boot,0));boot();
-</script></body></html>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.login{width:min(500px,calc(100% - 28px));margin:68px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 12px 36px rgba(23,32,51,.08)}
+.login .brand,.brand{font-weight:950;letter-spacing:.13em}
+.login .brand{color:var(--blue2)}
+.login input{margin-top:9px}
+.shell{width:min(1220px,calc(100% - 28px));margin:24px auto 60px}
+header{background:linear-gradient(135deg,var(--navy),#1e3a8a 58%,var(--green));color:#fff;padding:22px 24px;border-radius:20px;display:flex;justify-content:space-between;gap:18px;align-items:center}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.role{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.15)}
+button,.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.primary{background:var(--blue);color:#fff}
+.secondary{background:#edf2f7;color:var(--ink);border:1px solid var(--line)}
+.light{background:#fff;color:var(--ink);border:1px solid rgba(255,255,255,.6)}
+.danger{background:#fff1f0;color:var(--danger);border:1px solid #fecaca}
+button:disabled{opacity:.55;cursor:not-allowed}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cfd7e3;border-radius:9px;background:#fff;color:var(--ink)}
+textarea{min-height:100px;resize:vertical}
+label{display:block;font-weight:750;margin-bottom:6px}
+.field small,.muted{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card strong.metric{font-size:30px;display:block;color:var(--navy)}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.nav button{background:#fff;border:1px solid var(--line)}
+.nav button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.panel{margin-top:14px}
+.panel h2,.panel h3{color:var(--navy)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.notice{padding:13px 14px;border-radius:11px;background:#eef6ff;border:1px solid #bfd6ff;line-height:1.5}
+.notice.success{background:#ecfdf3;border-color:#abefc6;color:#067647}
+.notice.warn{background:#fffaeb;border-color:#fedf89;color:#7a2e0e}
+.setup-banner{display:flex;justify-content:space-between;gap:16px;align-items:center;background:#fffaeb;border:1px solid #fedf89;border-radius:15px;padding:16px;margin-top:16px}
+.progress{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green))}
+.wizard-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.wizard-tabs button{background:#f8fafc;border:1px solid var(--line);color:var(--ink);text-align:left}
+.wizard-tabs button.active{background:#eef4ff;border-color:#9db8ff;color:#1d4ed8}
+.wizard-tabs b{display:block}
+.wizard-tabs small{display:block;color:var(--muted);font-weight:600;margin-top:2px}
+.step-panel{display:none}
+.step-panel.active{display:block}
+.list{display:grid;gap:10px}
+.item{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px}
+.item.selected{border-color:#7ea2ff;box-shadow:0 0 0 2px #e8efff}
+.itemtop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.chip{display:inline-block;border-radius:999px;padding:5px 8px;background:#eef4ff;color:#274690;font-size:12px;font-weight:800;margin:2px}
+.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.kicker{font-size:12px;text-transform:uppercase;letter-spacing:.09em;font-weight:900;color:var(--blue2)}
+.next-card{background:linear-gradient(180deg,#fff,#f8fbff)}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.22);max-width:min(92vw,720px)}
+.placeholder{padding:34px;text-align:center}
+.feature{display:inline-block;background:#eef4ff;border-radius:999px;padding:6px 9px;margin:4px;font-size:12px}
+@media(max-width:850px){
+ .cards{grid-template-columns:repeat(2,1fr)}
+ .grid2,.grid3{grid-template-columns:1fr}
+ header,.setup-banner{flex-direction:column;align-items:flex-start}
+ .wizard-tabs{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){
+ .cards{grid-template-columns:1fr 1fr}
+ .wizard-tabs{grid-template-columns:1fr}
+ .shell{width:min(100% - 18px,1220px)}
+ .panel,.card{padding:15px}
+}
+</style>
+</head>
+<body>
+<section id="login" class="login">
+ <div class="brand">VENTRYVO</div>
+ <h1>Customer Portal</h1>
+ <p class="muted">Sign in with the account attached to your organization.</p>
+ <input id="email" type="email" autocomplete="email" placeholder="Email">
+ <input id="password" type="password" autocomplete="current-password" placeholder="Password">
+ <button id="loginBtn" class="primary" style="width:100%;margin-top:10px">Sign In</button>
+ <p id="msg" class="muted"></p>
+</section>
+
+<main id="app" class="shell hidden">
+ <header>
+  <div>
+   <div class="brand">VENTRYVO</div>
+   <div id="orgTitle" style="opacity:.9;margin-top:4px">Customer Workspace</div>
+  </div>
+  <div class="header-actions">
+   <span id="roleBadge" class="role"></span>
+   <button id="logoutBtn" class="light">Sign Out</button>
+  </div>
+ </header>
+
+ <section id="setupBanner" class="setup-banner hidden">
+  <div style="flex:1">
+   <b>Finish setting up your VENTRYVO workspace</b>
+   <div id="setupBannerText" class="muted" style="margin-top:4px"></div>
+   <div class="progress"><span id="setupProgressBar" style="width:0%"></span></div>
+  </div>
+  <button id="continueSetupBtn" class="primary">Continue Setup</button>
+ </section>
+
+ <div class="cards">
+  <div class="card"><strong id="eventsCount" class="metric">0</strong><span>Events</span></div>
+  <div class="card"><strong id="vendorsCount" class="metric">0</strong><span>Vendors</span></div>
+  <div class="card"><strong id="appsCount" class="metric">0</strong><span>Applications</span></div>
+  <div class="card"><strong id="invoicesCount" class="metric">0</strong><span>Invoices</span></div>
+ </div>
+
+ <nav class="nav" aria-label="VENTRYVO sections">
+  <button data-nav="dashboard" class="active">Dashboard</button>
+  <button data-nav="setup">Setup</button>
+  <button data-nav="events">Events</button>
+  <button data-nav="vendors">Vendors</button>
+  <button data-nav="applications">Applications</button>
+  <button data-nav="billing">Billing</button>
+  <button data-nav="staff">Staff</button>
+  <button data-nav="reports">Reports</button>
+ </nav>
+
+ <section id="dashboardPanel" data-panel="dashboard"></section>
+
+ <section id="setupPanel" data-panel="setup" class="hidden">
+  <div class="panel">
+   <div class="kicker">First-time configuration</div>
+   <h2>Build your first event from start to finish</h2>
+   <p class="muted">VENTRYVO will save each step. You can come back later and add more locations, events, and booth types.</p>
+   <div class="wizard-tabs">
+    <button data-step="business"><b>1. Business</b><small>Organization & defaults</small></button>
+    <button data-step="location"><b>2. Location</b><small>Where events happen</small></button>
+    <button data-step="event"><b>3. Event</b><small>Date, hours & venue</small></button>
+    <button data-step="spaces"><b>4. Spaces</b><small>Inventory & pricing</small></button>
+   </div>
+
+   <div id="businessStep" class="step-panel">
+    <h3>Business settings</h3>
+    <form id="businessForm">
+     <div class="grid2">
+      <div class="field"><label>Organization name</label><input id="businessName" required></div>
+      <div class="field"><label>Primary contact</label><input id="contactName" autocomplete="name"></div>
+      <div class="field"><label>Contact email</label><input id="contactEmail" type="email" autocomplete="email"></div>
+      <div class="field"><label>Phone</label><input id="contactPhone" autocomplete="tel"></div>
+      <div class="field"><label>Website</label><input id="websiteUrl" type="url" placeholder="https://"></div>
+      <div class="field"><label>Timezone</label><input id="timezone" list="timezoneList" placeholder="America/New_York"><small>Use an IANA timezone such as America/New_York.</small></div>
+      <div class="field"><label>Currency</label><select id="currency"><option value="USD">USD — US Dollar</option><option value="CAD">CAD — Canadian Dollar</option><option value="GBP">GBP — British Pound</option><option value="EUR">EUR — Euro</option></select></div>
+      <div class="field"><label>Default sales tax %</label><input id="taxRate" type="number" step="0.01" min="0" max="100" value="0"></div>
+     </div>
+     <datalist id="timezoneList"><option value="America/New_York"><option value="America/Chicago"><option value="America/Denver"><option value="America/Los_Angeles"><option value="America/Phoenix"><option value="America/Anchorage"><option value="Pacific/Honolulu"><option value="America/Toronto"><option value="Europe/London"><option value="Europe/Paris"><option value="UTC"></datalist>
+     <div class="actions"><button class="primary" type="submit">Save Business Settings</button></div>
+    </form>
+   </div>
+
+   <div id="locationStep" class="step-panel">
+    <h3>Locations</h3>
+    <div id="locationList" class="list"></div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+    <h3>Add a location</h3>
+    <form id="locationForm">
+     <div class="grid2">
+      <div class="field"><label>Venue / location name</label><input id="locationName" required placeholder="Example: Community Center"></div>
+      <div class="field"><label>Address</label><input id="address1" autocomplete="street-address"></div>
+      <div class="field"><label>Address line 2</label><input id="address2"></div>
+      <div class="field"><label>City</label><input id="city" autocomplete="address-level2"></div>
+      <div class="field"><label>State / region</label><input id="stateRegion" autocomplete="address-level1"></div>
+      <div class="field"><label>Postal code</label><input id="postalCode" autocomplete="postal-code"></div>
+      <div class="field"><label>Country code</label><input id="countryCode" value="US" maxlength="2"></div>
+      <div class="field"><label>Venue contact</label><input id="venueContact"></div>
+      <div class="field"><label>Venue phone</label><input id="venuePhone"></div>
+     </div>
+     <div class="field" style="margin-top:12px"><label>Location notes</label><textarea id="locationNotes" placeholder="Parking, loading access, tables/chairs, setup notes, etc."></textarea></div>
+     <div class="actions"><button class="primary" type="submit">Save Location</button></div>
+    </form>
+   </div>
+
+   <div id="eventStep" class="step-panel">
+    <h3>Create your first event</h3>
+    <form id="eventForm">
+     <div class="grid2">
+      <div class="field"><label>Event name</label><input id="eventName" required placeholder="Example: Holiday Craft Market"></div>
+      <div class="field"><label>Event type</label><select id="eventType"><option>Craft Market</option><option>Vendor Market</option><option>Festival</option><option>Farmers Market</option><option>Pop-Up</option><option>Expo</option><option>Other</option></select></div>
+      <div class="field"><label>Location</label><select id="eventLocation" required></select></div>
+      <div class="field"><label>Date</label><input id="eventDate" type="date" required></div>
+      <div class="field"><label>Start time</label><input id="startTime" type="time" required value="10:00"></div>
+      <div class="field"><label>End time</label><input id="endTime" type="time" required value="15:00"></div>
+     </div>
+     <div class="field" style="margin-top:12px"><label>Public description</label><textarea id="eventDescription" placeholder="A short description vendors or shoppers may eventually see."></textarea></div>
+     <div class="actions"><button class="primary" type="submit">Save Event</button></div>
+    </form>
+   </div>
+
+   <div id="spacesStep" class="step-panel">
+    <h3>Space types & pricing</h3>
+    <p class="muted">Create the inventory vendors will eventually choose from. Examples: Indoor 6-foot table, Outdoor 10×10, Premium Corner.</p>
+    <div class="field"><label>Event</label><select id="spaceEvent"></select></div>
+    <div id="spaceList" class="list" style="margin-top:12px"></div>
+    <form id="spaceForm" style="margin-top:18px">
+     <div class="grid3">
+      <div class="field"><label>Space type name</label><input id="spaceName" required placeholder="Indoor Booth"></div>
+      <div class="field"><label>Area</label><select id="spaceArea"><option value="indoor">Indoor</option><option value="outdoor">Outdoor</option><option value="mixed">Other / Mixed</option></select></div>
+      <div class="field"><label>Quantity available</label><input id="spaceQuantity" type="number" min="1" step="1" value="1" required></div>
+      <div class="field"><label>Price</label><input id="spacePrice" type="number" min="0" step="0.01" value="0" required></div>
+      <div class="field"><label>Max tables</label><input id="spaceTables" type="number" min="0" step="1" placeholder="Optional"></div>
+      <div class="field"><label>Sort order</label><input id="spaceSort" type="number" min="0" step="1" value="0"></div>
+     </div>
+     <div class="field" style="margin-top:12px"><label>Description</label><input id="spaceDescription" placeholder="Example: Includes one 6-foot table and two chairs"></div>
+     <div class="actions"><button class="primary" type="submit">Add Space Type</button></div>
+    </form>
+    <div id="finishSetupArea" style="margin-top:22px"></div>
+   </div>
+  </div>
+ </section>
+
+ <section id="eventsPanel" data-panel="events" class="hidden"></section>
+ <section id="vendorsPanel" data-panel="vendors" class="hidden"></section>
+ <section id="applicationsPanel" data-panel="applications" class="hidden"></section>
+ <section id="billingPanel" data-panel="billing" class="hidden"></section>
+ <section id="staffPanel" data-panel="staff" class="hidden"></section>
+ <section id="reportsPanel" data-panel="reports" class="hidden"></section>
+</main>
+
+<div id="toast" class="toast hidden"></div>
+<script type="module" src="/js/customer-portal.js?v=20261004-core1"></script>
+</body>
+</html>
