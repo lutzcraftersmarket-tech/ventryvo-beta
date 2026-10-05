@@ -524,7 +524,7 @@ async function requestLoginCode(){
  byId("loginBtn").disabled=true;
  const result=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
  byId("loginBtn").disabled=false;
- if(result.error){byId("msg").textContent=result.error.message;return;}
+ if(result.error){const raw=String(result.error.message||"");byId("msg").textContent=(raw.toLowerCase().includes("signups not allowed")||raw.toLowerCase().includes("user not found"))?"No VENTRYVO account was found for that email. Use the email that was invited or registered for this organization.":raw;return;}
  pendingLoginEmail=email;
  byId("emailStage").classList.add("hidden");
  byId("codeStage").classList.remove("hidden");
